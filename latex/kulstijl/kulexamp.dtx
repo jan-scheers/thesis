@@ -1,0 +1,506 @@
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+% \GetFileInfo{kulexamp.drv}
+% \title{K.U.Leuven specific Document Classes\\
+%   Examples\\
+%   version \fileversion\ (for \LaTeXe)}
+% \author{Luc Van Eycken\\
+%   \texttt{Luc.VanEycken@esat.kuleuven.be}}
+% \date{\filedate}
+% \maketitle
+%
+% \begin{abstract}
+%    This file \file{kulexamp.dtx} contains some examples for the
+%    K.U.Leuven specific document classes, based on the
+%    ``huisstijl''\footnote{Katholieke Universiteit Leuven,
+%    ``\textit{Huisstijl handleiding}''}). The description and the source
+%    of these classes can be found in the file \file{kulstijl.dtx}.
+% \end{abstract}
+%
+% \StopEventually{}
+%
+% \section{Driver}
+%    Ask for the same version of \LaTeX\ as \file{kulstijl.dtx}. \\
+%    Normally we don't print an index.
+%    \begin{macrocode}
+%<*driver>
+\NeedsTeXFormat{LaTeX2e}[1996/12/01]
+\ProvidesFile{kulexamp.drv}[2003/02/28 v1.3 Examples of kulstijl]
+\documentclass[a4paper]{ltxdoc}
+\newcommand*\Lopt[1]{\textsf{#1}}
+\newcommand*\file[1]{\texttt{#1}}
+\begin{document}
+\DocInput{kulexamp.dtx}
+\end{document}
+%</driver>
+%    \end{macrocode}
+%
+% \section{Examples}
+%    \begin{macrocode}
+%<*example>
+%    \end{macrocode}
+% \subsection{Preamble}
+%    First define the document class and mention the specific options.
+%    \begin{macrocode}
+%<*brief>
+%<brief>%% You can always add one of the following options to see their effect:
+%<brief>%%   foldingmarks, nofoldingmarks, preprintedform, centerpage
+\documentclass[noconfigfiles]{kulbrief}
+%</brief>
+%<*fax>
+\documentclass[noconfigfiles]{kulfax}
+%</fax>
+%<*memo>
+\documentclass[noconfigfiles]{kulmemo}
+%</memo>
+%<*verslag>
+\documentclass[noconfigfiles,11pt]{kulverslag}
+%</verslag>
+%<*kaart>
+%<kaart>%% You can always add one of the following options to see their effect:
+%<kaart>%%   foldingmarks, nofoldingmarks, centerpage
+\documentclass[noconfigfiles]{kulkaart}
+%</kaart>
+%    \end{macrocode}
+%
+%    Then include the system-wide configuration file.
+%    \begin{macrocode}
+%<*def>
+%<def>%% System-wide configuration file "kulstijl.def"
+%<def>% The address of the department
+\address{Rectoraat \\ Interne Relaties \\
+  \textbf{Dienst van de Academisch Ombudsman}\\
+  Universiteitshal\\  Oude Markt 13 B-3000 Leuven}
+%<def>% Rather silly departemental logo
+\setvar\deptlogo{\framebox{\Large DAO}}
+%<def>% The fonts to use:
+%<def>%   * Helvetica in the body of the text, except for reports
+%<def>%     If you don't have Helvetica installed, comment the next two lines
+\ifthenelse{\equal{\CurrentClass}{kulverslag}}{}{%
+  \RequirePackage{helvet}}
+%<def>%     If you prefer the Roman family as default, uncomment the next line
+%<def>%\renewcommand{\familydefault}{\rmdefault}
+%<def>%   * Futura for the preprinted information
+%<def>%     If you don't have Futura installed, comment the next line
+\renewcommand{\preprintfontdefaults}{\fontfamily{pfu}}
+%</def>
+%    \end{macrocode}
+%
+%    Next include the personal configuration file of A. Ickx.
+%    \begin{macrocode}
+%<*cfg>
+%<cfg>%% Personal configuration file "kulstijl.cfg" of A. Ickx
+\signature{Prof.\ Dr.\ A. Ickx}
+\name{Prof.\ Dr.\ A. Ickx}
+\profession[Ombudsman van de K.U.Leuven]{ombudsman}
+\telephonenumber{(016) 32\,40\,10}
+\faxnumber{(016) 32\,40\,14}
+\email{a.ickx@dio.kuleuven.be}
+\www{http://www.dio.kuleuven.be/~ickx/}
+\ifthenelse{\equal{\CurrentClass}{kulbrief}}{%
+  % The preprinted footer (kul@addpre = false) is 23.25pt high
+  \ifthenelse{\boolean{kul@addpre}}{}{\setlength{\firstfootsep}{8.25pt}}
+  % Always print the following topics in letters:
+  \ourreference{}
+  \yourreference{}
+  }{\ifthenelse{\equal{\CurrentClass}{kulfax}}{%
+    % Try some faxes with the following line commented out
+    \renewcommand{\firstpagedefaults}{\letterlike}
+    }{}}
+%<cfg>% Shorthand for an often used address
+\newcommand{\tofriend}{\sendto{De heer Gerard Bruycker\\
+    Yousers \& co.\\ Alphadreef 75\\ 3001 HEVERLEE}{%
+    (016) 205184}{(016) 205185}{GeBruycker@yousers.be}}
+%</cfg>
+%    \end{macrocode}
+%    \begin{macrocode}
+%<def|cfg>%% End of the configuration files contents
+%    \end{macrocode}
+%
+%    Now comes the rest of the preamble.
+%    \begin{macrocode}
+%<!kaart>%% If you have babel installed, try
+%<!kaart>%\usepackage[english]{babel}
+%<brief>\makelabels
+%<fax>%% If you have color installed (part of the graphics package) for dvips, try
+%<fax>%\usepackage[dvips]{color}
+%<fax>%% Try to uncomment the next line
+%<fax>%\setvar{\firstpagetoptext}{First page messages}
+%<kaart>%% The following may be useful with the centerpage option
+%<kaart>\setvar{\cardhsep}{0pt plus 1fil}
+\begin{document}
+%    \end{macrocode}
+%
+% \subsection{The \Lopt{kulbrief} class example}
+%    \begin{macrocode}
+%<*brief>
+\begin{letter}{De heer Andr\'e Janssens\\
+    directeur-generaal\\ Janssens en Janssens\\
+    Grote Baan 123\\ 3000 LEUVEN}
+  % Always use the anniversary logo and let the signature enter the footer
+  \setvar{\footlogo}{\logovviiv}
+  \setlength{\firstfootsep}{-2cm}
+  %
+  \ourreference{IR/AI/9501}
+  \subject{Nieuwe huisstijl K.U.Leuven}
+  \opening{Geachte Heer}
+  
+  Door de Dienst Informatie en onthaal van de K.U.Leuven werd in
+  samenwerking met Graphic Design Filip Le Roy \& Partners een nieuwe
+  huisstijl van de Katholieke Universiteit Leuven uitgewerkt, volledig
+  aangepast aan de actuele doelstellingen van onze Alma Mater.
+  
+  Aan het zegel van de K.U.Leuven, het beeld van de Sedes Sapientiae, werd
+  de stichtingsdatum van de universiteit toegevoegd. Dit onderstreept het
+  historisch karakter en de eeuwenlange traditie van onze Alma Mater. Het
+  letterlogogram KU werd hertekend, zodat Leuven, vooral internationaal,
+  sterker geaccentueerd wordt. Daarenboven werd een vignet uitgewerkt
+  waarin de naam van de universiteit voluit is geschreven.
+  
+  De opmaak van de brieven, briefomslagen en naamkaartjes wordt aangepast
+  aan de BIN-normen van het Belgisch Instituut voor Normalisatie die bij KB
+  werden vastgelegd, en aan de mogelijkheden van de administratieve
+  informatieverwerking. Deze nieuwe verschijningsvorm heeft als doel de
+  effici\"entie van het administratieve werk te verhogen en financi\"ele
+  besparingen te realiseren. Wat de briefomslagen betreft werd voor de
+  ge\"{\i}ndividualiseerde verzendingen geopteerd voor een omslag met groot
+  venster, waarin zowel het volledig adres van de afzender als dit van de
+  geaddresseerde zichtbaar is. Deze vensteromslag werd speciaal ontworpen
+  voor de K.U.Leuven in overleg met het hoofdbestuur van de Regie van de
+  Posterijen. Met deze omslag differentieert de K.U.Leuven zich duidelijk
+  van elke andere instelling en daarenboven kan hiermee een belangrijke
+  besparing gerealiseerd worden via centrale aankoop.
+
+  In deze mededelingen wordt in Deel~1 de nieuwe visuele verschijningsvorm
+  van de Sedes, het letterlogogram en het vignet voorgesteld. In Deel~2
+  wordt de nieuwe verschijningsvorm van de brieven, briefomslagen,
+  naamkaartjes, faxberichten, memo's en verslagen medegedeeld, gevolgd door
+  instructiebladen met gedetailleerde technische gegevens. Als bijlage
+  wordt technisch materiaal voor drukkers toegevoegd. Met deze technische
+  fiche kan u terecht bij elke drukker.
+  \closing{Met vriendelijke groeten}
+\end{letter}
+
+%<brief>%% Next letter
+%<brief>% Don't print references unless defined by the user
+\undefine{\ourreferencedata}
+\undefine{\yourreferencedata}
+%<brief>% The letter is sent to Vandam and De Haan
+\begin{letter}[dringend]{%
+    De heer Jan Vandam \\
+    directeur-generaal \\
+    nv Interland \\
+    Parkstraat 248 b \\
+    NL-2321 JV LEIDEN \\
+    NEDERLAND}&{%
+    De heer Wilfried De Haan \\
+    Kiplaan 35 \\
+    9999 VILVOORDE}
+  % 3 signatures, 2 per line, with a signature space of 6 lines
+  \signature{Richard Robeyns \\ hoofddirecteur}
+  \signature*{Alfred Ickx \\ \fromprofession}
+  \signature*{Bert Ickx \\ assistent}
+  \setcounter{sigsperline}{2}
+  \setvar{\signaturespace}{6\baselineskip}
+
+  \subject{Typen van documenten volgens de BIN-normen}
+  \ourreference{JA/ldb 96.09}
+
+  \opening{Geachte heer}
+  Sinds mei 1991 is er een nieuwe norm verschenen van het Belgisch
+  instituut voor normalisatie (BIN), nl.\ 'Het indelen en typen van
+  documenten'. Hierna volgen enkele richtlijnen voor het typen van de
+  brieftekst volgens deze norm.
+  
+  Voor het adres van de geadresseerde zijn zeven regels voorzien. Tussen de
+  adresregels komen geen witregels. Specifieke vermeldingen zoals
+  \emph{aangetekend}, \emph{dringend}, \emph{luchtpost} komen op de eerste
+  regel in de landstaal van de afzender. De aanschrijftitel wordt voluit
+  geschreven en komt in de landstaal van de geadresseerde, bijvoorbeeld
+  Professor, Mevrouw, De heer.  Dan volgt eerst de voornaam en dan de
+  achternaam in kleine letters. De aanduiding t.a.v.\ is niet gebruikelijk.
+  De functie begint met een kleine letter en is in de landstaal van de
+  geadresseerde. De afdeling komt in kleine letters. De naam van de
+  organisatie wordt geschreven zoals de organisatie zelf haar naam
+  schrijft. Bij de straat en het nummer komt er een spatie tussen de
+  onderdelen van het nummer, bijvoorbeeld Kerkstraat 3 bus 1\@. Na de
+  postcode is er \'e\'en spatie en dan volgt de plaatsnaam in hoofdletters,
+  in de landstaal van de geadresseerde, bijvoorbeeld LONDON\@. Het land
+  wordt eveneens in hoofdletters geschreven maar in de landstaal van de
+  afzender.
+
+  De kenmerken kunnen zowel hoofdletters als kleine letters bevatten. De
+  datum wordt als volgt getypt\,: JJ--MM--DD, bijvoorbeeld 95--02--24.
+  Nadien volgt \'e\'en witregel.
+  
+  Het onderwerp komt v\'o\'or de aanspreking. Het woord \emph{Onderwerp} of
+  \emph{Betreft} is overbodig. Om het onderwerp te accentueren kunt u het
+  in vet zetten. Enkel als het onderwerp een volledige zin is, plaatst u
+  een leesteken achter de zin. Als dit niet het geval is, mag het eerste
+  woord met een kleine letter beginnen. Na het onderwerp volgen er twee
+  witregels.
+
+  De aanspreking begint met een hoofdletter. Na de aanspreking komt geen
+  komma. Een witregel scheidt de aanspreking van het briefgesprek.
+
+  In het briefgesprek springen alinea's niet in, maar beginnen altijd tegen
+  de linkermarge. Er komt \'e\'en witregel tussen de alinea's. Brieven
+  drukt u af met enkele regelafstand.
+
+  De slotformule volgt op \'e\'en witregel van het briefgesprek en begint
+  steeds met een hoofdletter. Als de slotformule een volledige zin is,
+  plaatst u achteraan een leesteken. In het andere geval wordt geen
+  leesteken geplaatst. Tussen de slotformule en de naam van de
+  ondertekenaar komen zes witregels.
+
+  De naam van de ondertekenaar wordt in kleine letters geschreven\,: eerst
+  de voornaam, dan de achternaam. De voornaam wordt bij voorkeur voluit
+  geschreven. Personen met een voornaam die zowel voor dames als heren
+  wordt gebruikt, schrijven achter hun naam tussen haakjes 'mevrouw' of 'de
+  heer'. De functie van de ondertekenaar komt onder de naam en steeds
+  volledig in kleine letters. Bij meer ondertekenaars schrijft u de
+  gegevens van de belangrijkste persoon rechts.
+  
+  De vermeldingen \emph{Bijlage}, \emph{Bijlagen}, \emph{Kopie}, al dan
+  niet gevolgd door een dubbelepunt, komen op twee witregels onder de naam.
+  Om een nieuwe pagina te vermijden, kunt u deze gegevens rechts ter hoogte
+  van de naam vermelden.
+  \closing{Met vriendelijke groeten}
+  \encl{Geen}
+\end{letter}
+
+%<brief>%% Now an empty letter for labels only
+%<brief>% The letter is sent to User
+\begin{letter}{%
+    Mevrouw User \\
+    Madeliefjesweg 65 \\
+    3000 LEUVEN}
+\end{letter}
+%</brief>
+%    \end{macrocode}
+%
+% \subsection{The \Lopt{kulfax} class example}
+%    \begin{macrocode}
+%<*fax>
+\begin{fax}[02-90210]{02--1234567}{Adressee \\ Company \\ Adress and Town}
+  \subject{The \textsf{kulfax} class}
+
+  \begin{firstpage}
+    The \textsf{firstpage} environment is used to put some additional text
+    on the first page. The heading is the optional argument of this
+    environment, which defaults to the contents of the variable
+    ``\verb"\firstpagetoptext"''. At startup, this variable contains
+    ``\verb"\messagesname"''.
+
+    Use this environment only for small notes.
+  \end{firstpage}
+
+  The rest of the fax, is typeset like an article, starting from page~2.
+  Remark that this class automatically computes the correct number of pages
+  and prints it on the first page. This explains why the first page is
+  printed last.
+
+  If you want to add extra pages, use the ``\verb"\addpages"'' command.
+
+  \addpages{3}
+\end{fax}
+
+\begin{fax}{111111}{First addressee \\ Address one}
+  &{2222}{{Second one \\ Address 2}}
+  &{3333}{Third one \\ Address 3}
+  \firstheadtitle{Fax Front Page}
+
+  \begin{firstpage}[]
+    \opening{Dear addressee,}
+    this lookes more like a letter because the macro \verb"\firstpagedefaults"
+    includes \verb"\letterlike". It has the appropriate spacing, I hope.
+    You can also use the \verb"\opening" and \verb"\closing" commands as in
+    a letter.
+
+    As you can see, the address information of the addressees disappears if
+    more than one addressee is given. You can make \LaTeX\ regard the
+    entire argument as a name by enclosing it in an extra group, as was
+    done with the second addressee.
+    \closing{Best regards,}
+  \end{firstpage}
+\end{fax}
+
+%<fax>% Here is the alternate way to specify the addressees, using \faxto.
+\begin{fax}
+  \faxto{222222}{First addressee \\ Address 1}
+  \tofriend
+  % If you want the long address format, uncomment the next line
+%<fax>%  \renewcommand{\printfaxto}{\printlongfaxto}
+  \renewcommand{\firstpagedefaults}{}
+
+  % If you need the see the need for \addpages, comment the next line
+  \addpages{1}
+  \begin{firstpage}[Attention!]
+    The \verb"\faxto" commands can only be used just after the start of
+    the \textsf{fax} environment.
+
+    \vfill
+    Eventually, 
+    % The following is some TeX hackery to end the page after the first
+    % line of this paragraph.
+    \vadjust{\break}%
+    you can let the first page span several pages, so your fax will look
+    more like a memo. However, since \LaTeX\ assumes that you are occupying
+    no more than one page for the introductory data and the
+    \texttt{firstpage} environment, you manually have to increase the page
+    counter with the ``\verb"\addpages"'' command before the
+    \texttt{firstpage} environment.
+  \end{firstpage}
+
+  This comes on a separate page.
+\end{fax}
+%</fax>
+%    \end{macrocode}
+%
+% \subsection{The \Lopt{kulmemo} class example}
+%    \begin{macrocode}
+%<*memo>
+\begin{memo}\relax
+  \tofriend
+  \subject{The \textsf{kulmemo} class}
+  \status{Public}
+  \cc{User 1 \\ user 2}
+
+%<memo>%  Some text.
+  \subsubsection*{To whom it may concern}
+  \begin{enumerate}
+  \item This memo is simply a test, so don't expect to much of it.
+  \item The text starts on the first page.
+  \end{enumerate}
+  The memo is typeset like an article, so normally you can use any ordinary
+  \LaTeX\ command here.
+
+  \newpage
+  And this is put on the next page.
+\end{memo}
+
+%<memo>%% And now a simple memo to illustrate the use of \starttext
+\begin{memo}{Adressee \\ Company \\ Adress and Town}
+  % If you need the see the need for \starttext, comment the next line
+  \starttext
+  \hbox{\Large\bfseries Attention!}
+  % The above \starttext isn't needed if you use \mbox instead of \hbox!
+  \begin{quote}
+    The command ``\verb"\starttext"'' must be used if some command
+    generates boxes in vertical mode.
+  \end{quote}
+\end{memo}
+%</memo>
+%    \end{macrocode}
+%
+% \subsection{The \Lopt{kulverslag} class example}
+%    \begin{macrocode}
+%<*verslag>
+%<verslag>%% First we try some topic definitions:
+\newtopic{\present}[Present]
+\newtopic*{\status}[Status\,:]
+%<verslag>%% Note: the previous line may give a warning if babel is used.
+%<verslag>%% Now we use topics:
+\ourreference{Report 1}
+\subject{The \textsf{kulverslag} class}
+\status{Public}
+\present{Me and you}
+%<verslag>%% We also change the header lines for page 2 and following pages
+\renewcommand{\headerlines}{\printtopic\subject \printtopic\headdate}
+%<verslag>%% The following line stores the expanded version of the date
+%<verslag>%% before \date can change it.
+\expandargument\headdate{\headdatedata}
+%<verslag>%% Then we use the command \hangfrom to put things in the header
+\hangfrom*{Inline test}{test done}
+\hangfrom{Test}{Topic hanging from margin}
+\cc{User 1 \\ user 2}
+
+%<verslag>%% Now comes the actual text
+\begin{titlepage}
+  \title{Test of the Report}
+  \author{Author}
+  \date{Some time ago}
+  \maketitle
+\end{titlepage}
+%<verslag>%\vspace*{2cm}
+\subsubsection*{To whom it may concern}
+\begin{enumerate}
+\item This report is simply a test, so don't expect to much of it.
+\item The text starts on the first page.
+\item Because the topic \verb"\status" was defined with \verb"\newtopic*",
+  the status is not included in the header of the first page.
+\end{enumerate}
+The \textsf{kulverslag} report is typeset like an article, so normally
+you can use any ordinary \LaTeX\ command here.
+
+Now we try to print some topic information inside our report:
+\printtopic\ourreference
+\printtopic\subject
+\printtopic\status
+\printtopic\test
+
+The following commands are not topics, but they are based on the command
+\verb"\hangfrom", so they can be used at the beginning of the report as well
+as inside the report:
+\cc{User 1 \\ user 2}
+\hangfrom{Test}{Now it is inlined!\\
+  This is different from the previous experiment.}
+\printfrommargin{More tests}{Topic again hanging from the margin.}
+%</verslag>
+%    \end{macrocode}
+%
+% \subsection{The \Lopt{kulkaart} class example}
+%    \begin{macrocode}
+%<*kaart>
+%<kaart>% First the default way to generate business cards
+\businesscards
+%<kaart>% Next the generic way to generate business cards
+\setcounter{numberofcards}{7}
+\begin{cards*}[.3\columnwidth,6cm]
+\normalsize
+Business card\\
+(special format)
+\end{cards*}
+%<kaart>% Now a generic card
+\setcounter{numberofcards}{3}
+\begin{cards}
+\vspace*{1.5cm}
+\footnotesize
+WITH THE COMPLIMENTS OF
+\end{cards}
+%<kaart>% And finally 2 pages of a large card
+\setcounter{numberofcards}{-2}
+\begin{largecards}
+Large card
+\end{largecards}
+%<kaart>% The following should not typeset anything
+\setcounter{numberofcards}{0}
+\begin{cards}
+Card
+\end{cards}
+%</kaart>
+%    \end{macrocode}
+%
+%    Here end the examples.
+%    \begin{macrocode}
+\end{document}
+%</example>
+%    \end{macrocode}
+%
+% \Finale
+%
+\endinput

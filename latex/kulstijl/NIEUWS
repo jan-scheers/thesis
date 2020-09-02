@@ -1,0 +1,16 @@
+Versies "kulfonts"
+==================
+1.0   Oorspronkelijke versie
+2.0   Extra karakters: Sedes van 36mm; jubileumlogo (575)
+3.0   Extra karakter: logo Associatie K.U.Leuven
+
+
+Versies "kulstijl"
+==================
+1.0   Oorspronkelijke versie
+1.1   Jubileumlogo op het eerste blad
+1.2   Nieuw commando om WWW-adres toe te voegen
+1.3   Nieuwe commando's om departementale logo's toe te voegen
+1.4   Gebruik logo Associatie K.U.Leuven
+      + oplossing conflict met marvosym.sty
+1.5   Doe het ook zonder departementeel logo correct werken

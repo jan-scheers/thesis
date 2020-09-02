@@ -1,0 +1,217 @@
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+% \CheckSum{57}
+%
+% \GetFileInfo{kulfonts.sty}
+% \title{K.U.Leuven specific Fonts\\
+%    version \fileversion}
+% \author{Luc Van Eycken\\
+%   \texttt{Luc.VanEycken@esat.kuleuven.ac.be}}
+% \date{\filedate}
+% \maketitle
+%
+% \begin{abstract}
+%    This package defines for \LaTeX\ the extra fonts, used in documents
+%    of the K.U.Leuven. It provides commands to access the characters of
+%    the font |kulfont1|, containing the fixed size characters.
+% \end{abstract}
+%
+% \iffalse ^^A Meta-comment: no driver documentation is printed
+% \section{The documentation driver}
+%    \begin{macrocode}
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage{kulfonts}
+%\CodelineIndex
+%\EnableCrossrefs
+\RecordChanges
+\setcounter{StandardModuleDepth}{1}
+\begin{document}
+\DocInput{kulfonts.dtx}
+\PrintChanges
+\PrintIndex
+\end{document}
+%</driver>
+%    \end{macrocode}
+% \fi ^^A End of meta-comment
+%
+% \section{User interface}
+%    The package \textsf{kulfonts} allows you to access the K.U.Leuven
+%    specific characters, contained in the \TeX{} font |kulfont1|. An
+%    overview is given in table~\ref{tab:kulfont1}.
+%    \begin{table}
+%      \begin{center}
+%        \renewcommand\arraystretch{1.2}
+%        \newlength\firstheight
+%        \settoheight\firstheight{\kulfontinversetext{FAX}}
+%        \addtolength\firstheight{3pt}
+%        \DeleteShortVerb\|
+%        \begin{tabular}{|c|l|}
+%          \hline
+%          symbol                           &\multicolumn{1}{c|}{description}\\
+%          \hline \rule{0pt}\firstheight
+%          \kulfontinversetext{FAX}         & inverse ``FAX''                \\
+%          \kulfontinversetext{MEMO}        & inverse ``MEMO''               \\
+%          \kulfontinversetext{REPORT}      & inverse ``REPORT''             \\
+%          \kulfontinversetext{VERSLAG}     & inverse ``VERSLAG''            \\
+%          \kulfontinversetext{VOORBLAD FAX}& inverse ``VOORBLAD FAX''       \\
+%          \sedesxvii                       & Sedes (17\,mm tall)            \\
+%          \sedesxxii                       & Sedes (22\,mm tall)            \\
+%          \sedesxxxvi                      & Sedes (36\,mm tall)            \\
+%          \logovviiv                       & Anniversary (575) logo         \\
+%          \logoAssociatie           & Logo of the ``Associatie K.U.Leuven'' \\
+%          \hline
+%        \end{tabular}
+%        \MakeShortVerb\|
+%      \end{center}
+%      \caption{The different characters in font
+%               \texttt{kulfont1}~\fileversion.}
+%      \label{tab:kulfont1}
+%    \end{table}
+%    Since this font is only available at a fixed size, the characters
+%    cannot be scaled. This may result in strange effects if you fiddle
+%    with the |\magnification| parameter of \TeX{} (as does the
+%    \textsf{seminar} class).
+%
+% \DescribeMacro{\sedesxvii}
+% \DescribeMacro{\sedesxxii}
+% \DescribeMacro{\sedesxxxvi}
+% \changes{v2.0}{2000/01/29}{New character \cs{sedesxxxvi} introduced}
+%    First of all the font |kulfont1| contains the Sedes at three sizes:
+%    17\,mm, 22\,mm and 36\,mm. These characters can be accessed
+%    respectively by the commands |\sedesxvii|, |\sedesxxii| and
+%    |\sedesxxxvi|.
+%
+%    Furthermore, a few white-on black text strings are available in the
+%    font |kulfont1| as characters.
+% \DescribeMacro{\kulfontinversetext}
+%    The command |\kulfontinversetext|\oarg{fallback}\marg{text} gives you
+%    access to these characters. The command inserts the white-on-black
+%    \meta{text} if it exists in the font |kulfont1|, and the
+%    \meta{fallback} text otherwise. The \meta{fallback} text defaults to
+%    \meta{text}.
+%
+% \DescribeMacro{\logovviiv}
+% \changes{v2.0}{2000/01/29}{New character \cs{logovviiv} introduced}
+% \changes{v3.0}{2005/05/12}{\cs{logovviiv} has become obsolete}
+%    For reasons of compatibility, the command |\logovviiv| can still be
+%    used to print the 575th anniversary logo (at a size of 3\,cm). Please
+%    don't use this in new documents.
+%
+% \DescribeMacro{\logoAssociatie}
+% \changes{v3.0}{2005/05/12}{New character \cs{logoAssociatie} introduced}
+%    Finally, the command |\logoAssociatie| can be used to print the logo
+%    of the ``Associatie K.U.Leuven'' at its natural size for normal
+%    documents (2\,cm).
+%
+% \StopEventually{}
+%
+%
+% \section{Identification of the \texttt{kulfonts.sty} file}
+%    Provide the file identification:
+%    \begin{macrocode}
+%<*sty>
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{kulfonts}[2005/05/12 v3.0 K.U.Leuven font definitions]
+%    \end{macrocode}
+%
+%
+% \section{Loading the font}
+% \begin{macro}{\kulfonti}
+%    All characters come from the |kulfont1| font, which is only
+%    available at one size (10\,pt). We load this font here as a fixed size
+%    font called |\kulfonti|.
+%    \begin{macrocode}
+\newfont\kulfonti{kulfont1 at 10truept}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \section{Accessing the inverse texts}
+% \begin{macro}{\kulfontinversetext}
+%    The user command |\kulfontinversetext|\oarg{cmds}\marg{text} inserts
+%    the white-on-black \meta{text} if it exists in the font |kulfont1|,
+%    and the commands \meta{cmds} otherwise. The commands \meta{cmds}
+%    defaults to \meta{text}. The hack using "\meaning" is to avoid
+%    problems if \meta{text} contains control sequences.
+%    \begin{macrocode}
+\newcommand\kulfontinversetext{\@dblarg\kulfonti@txt}
+\@ifdefinable\kulfonti@txt{\long\def\kulfonti@txt[#1]#2{%
+    \def\reserved@a{#2}\edef\reserved@a{%
+      kulfonti@@\expandafter\strip@prefix\meaning\reserved@a}%
+    \@ifundefined\reserved@a{#1}{%
+      {\kulfonti \csname\reserved@a\endcsname}}}}
+%    \end{macrocode}
+%    The text strings are coupled to their character position in the font
+%    |kulfont1| through private control sequences.
+%    \begin{macrocode}
+\@namedef{kulfonti@@VOORBLAD FAX}{\char `B}
+\@namedef{kulfonti@@MEMO}{\char `C}
+\@namedef{kulfonti@@VERSLAG}{\char `D}
+\@namedef{kulfonti@@FAX}{\char `E}
+\@namedef{kulfonti@@REPORT}{\char `F}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \section{Accessing the logo characters}
+% \subsection{Accessing the Sedes logo}
+% \begin{macro}{\sedesxvii}
+% \begin{macro}{\sedesxxii}
+% \begin{macro}{\sedesxxxvi}
+% \changes{v2.0}{2000/01/29}{Sedes at 36\,mm defined}
+%    The Sedes logo is available at three sizes: 17\,mm, 22\,mm and 36\,mm.
+%    These are located in the |kulfont1| font at character positions |a|,
+%    |A| and |b|. The switch to the correct font is made local by an extra
+%    level of grouping.
+%    \begin{macrocode}
+\newcommand\sedesxvii {{\kulfonti \char `a}}
+\newcommand\sedesxxii {{\kulfonti \char `A}}
+\newcommand\sedesxxxvi{{\kulfonti \char `b}}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \subsection{Accessing the anniversary logo}
+% \begin{macro}{\logovviiv}
+% \changes{v2.0}{2000/01/29}{575th anniversary logo defined}
+%    The 575th anniversary logo is available at one size: 3\,cm.
+%    It is located in the |kulfont1| font at the character position |G|.
+%    The switch to the correct font is made local by an extra level of
+%    grouping.
+%    \begin{macrocode}
+\newcommand\logovviiv{{\kulfonti \char `G}}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \subsection{Accessing the logo of the ``Associatie K.U.Leuven''}
+% \begin{macro}{\logoAssociatie}
+% \changes{v3.0}{2005/05/12}{Logo of the `Associatie' defined}
+%    The logo of the ``Associatie K.U.Leuven'' is available at one size: 2\,cm.
+%    It is located in the |kulfont1| font at the character position |H|.
+%    The switch to the correct font is made local by an extra level of
+%    grouping.
+%    \begin{macrocode}
+\newcommand\logoAssociatie{{\kulfonti \char `H}}
+%</sty>
+%    \end{macrocode}
+% \end{macro}
+%
+% \Finale
+%
+\endinput

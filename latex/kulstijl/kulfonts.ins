@@ -1,0 +1,62 @@
+% Just in case the file is input from IniTeX
+\catcode`\{=1
+\catcode`\}=2
+% Check first for LaTeX2e
+\expandafter\let\expandafter\END\csname @@end\endcsname
+\ifx\END\relax \let\END\end \fi
+\def\Message{\immediate\write 16}
+\def\Temp{LaTeX2e}\ifx\Temp\fmtname\else
+  \ifx\documentstyle\undefined
+    \Message{***********************************************************}
+    \Message{*** This installation script needs to be run with latex ***}
+    \Message{***********************************************************}
+  \else
+    \Message{***************************************}
+    \Message{*** This installation needs LaTeX2e ***}
+    \Message{***************************************}
+  \fi
+  \expandafter\END
+\fi
+% Then for the correct format date (which implies docstrip 2.4)
+\def\ParseVersion#1/#2/#3#4#5\Temp{#1#2#3#4 }
+\ifnum\expandafter\ParseVersion\fmtversion//00\Temp <19961201
+  \Message{*************************************************************}
+  \Message{*** This installation needs LaTeX2e <1996/12/01> or later ***}
+  \Message{*************************************************************}
+  \expandafter\END
+\fi
+% We have the correct LaTeX format, which implies docstrip 2.4 or higher
+\input docstrip.tex
+\keepsilent
+\askforoverwritefalse
+
+\Msg{******************************************************}
+\Msg{*** Generating font defs for K.U.Leuven fixed font ***}
+\Msg{******************************************************}
+\generate{
+  \file{kulfonts.sty}{\from{kulfonts.dtx}{sty}}
+%% "kulfonts.fdd" no longer needed.
+%  \file{l1enc.def}{\from{kulfonts.fdd}{enc1}}
+%  \file{l1kul1.fd}{\from{kulfonts.fdd}{font1}}
+%% You can use "kulfonts.fdd" or "kulfonts.dtx" instead of "kulfonts.drv"!
+% \file{kulfonts.drv}{\from{kulfonts.fdd}{driver}}
+  }
+
+\ifToplevel{%
+  \Msg{**************************************************************}
+  \Msg{* To finish the installation you have to}
+  \Msg{*}
+  \Msg{* \space\space move the file kulfonts.sty into a directory}
+%  \Msg{* \space\space move the files l1enc.def and l1kul1.fd into a directory}
+  \Msg{* \space\space searched by TeX;}
+  \Msg{*}
+  \Msg{* \space\space move the kulfont1.tfm file in a TeX TFM directory;}
+  \Msg{*}
+  \Msg{* \space\space move the *.*pk files in an appropriate font directory,}
+  \Msg{* \space\space searched by your drivers.}
+  \Msg{*}
+  \Msg{* To produce the documentation run kulfonts.dtx through LaTeX.}
+  \Msg{**************************************************************}
+  }
+ 
+\endbatchfile

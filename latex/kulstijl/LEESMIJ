@@ -1,0 +1,49 @@
+De K.U.Leuven huisstijl voor LaTeX
+==================================
+
+De hieronder vermelde bestanden laten u toe om met LaTeX2e documenten te
+genereren die voldoen aan de eisen zoals ze door de interne huisstijl
+gesteld worden. Deze bestanden bevatten zowel fonts als documentklassen.
+De huidige versie 1 bevat brieven, faxen, memo's, verslagen en visitekaarten.
+
+
+Lijst van bestanden:
+
+   NIEUWS           een korte beschrijving van de verschillende versies
+
+   kulstijl.dtx     bestand dat alle "huisstijl" documentklassen beschrijft;
+                    hieruit worden de klassen zelf ge\"extraheerd
+   kulexamp.dtx     een aantal voorbeelden voor de verschillende klassen
+   kulstijl.ins     bestand om klassen en voorbeelden te extraheren
+
+   kulfonts.dtx     bestand dat alle nieuwe fonts beschrijft;
+                    hieruit wordt kulfonts.sty ge\"extraheerd
+   kulfonts.ins     bestand om fontbeschrijvingen te extraheren
+   kulfont1.tfm     TFM-informatie voor de lokale font      (binair bestand!)
+   kulfont1.300pk   font-bitmap voor een 300dpi printer     (binair bestand!)
+   kulfont1.600pk   font-bitmap voor een 600dpi printer     (binair bestand!)
+
+
+Installatie
+
+   De huidige versie heeft een recente versie van LaTeX nodig.
+   Indien Uw versie ouder is dan 1/12/1996, dan moet U eerst een nieuwe
+   LaTeX installeren.
+
+   Voer de volgende twee bevelen uit:
+
+      latex kulstijl.ins
+      latex kulfonts.ins
+
+   De nodige bijkomende instructies voor de installatie verschijnen telkens
+   op het scherm na elk bevel. De bijbehorende (Engelse) documentatie kan
+   aangemaakt worden via:
+
+      latex kulstijl.dtx
+      latex kulfonts.dtx
+
+
+Bugs en opmerkingen graag aan
+   Luc.VanEycken@esat.kuleuven.be
+Nieuwe versies zijn steeds te vinden op
+   ftp://ftp.esat.kuleuven.be/pub/latex/kulstijl/
