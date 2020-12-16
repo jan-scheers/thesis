@@ -1,0 +1,123 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,geometry}
+%Gummi|065|=)
+
+\begin{document}
+
+\begin{equation*}
+	\begin{aligned}
+	& \underset{W}{\text{minimize}}
+	& & \frac{1}{2}\sum\limits_{j=0}^{N}||W_Hz_H^j - y^j||^2 \\
+	& \text{subject to}
+	& & 0  = z_{k+1}^j - \sigma(W_kx_k^j + b_k), &k = 0,\ldots,H-1,j = 1,\ldots,N
+	\end{aligned}
+\end{equation*}
+
+
+\begin{equation*}
+	\begin{aligned}
+	& \text{min}
+	&  & \frac{1}{2} ||F(x)||^2_2 \\
+	& \text{s. t.}
+	& &  h(x) = 0
+	\end{aligned}
+\end{equation*}
+
+\begin{equation*}
+	\begin{aligned}
+		\mathcal{L}_c(x,\lambda)
+		&= \frac{1}{2} ||F(x)||^2_2 + <\lambda,h(x)> + \frac{c}{2} || h(x) ||^2_2 \\
+		&= \frac{1}{2} ||F(x)||^2_2 + \frac{c}{2} ||h(x) + \lambda/c ||^2_2 - \frac{1}{2c} ||\lambda||^2_2 \\
+		&= \frac{c}{2} \Big|\Big|
+		\begin{bmatrix}
+			F(x)/\sqrt{c} \\
+			h(x) + \lambda/c
+		\end{bmatrix} \Big|\Big|^2
+	\end{aligned}
+\end{equation*}
+Find
+\begin{equation}
+\begin{aligned}
+x^k & \text{ s. t. }&  ||\nabla_k\mathcal{L}_{c_k}(x^k,\lambda^k)||_2 \leq \epsilon
+\end{aligned}
+\end{equation}
+\begin{equation}
+\lambda^{k+1} = \lambda^k + c_kh(x^k)
+\end{equation}
+\begin{equation}
+\begin{aligned}
+F   &= y - (W_3z_2+b_3) \\
+h_1 &= z_1 - \sigma(W_1x+b_1) \\
+h_2 &= z_2 - \sigma(W_2z_1+b_2)
+\end{aligned}
+\end{equation}
+
+\begin{tabular}{r r | c c c c}\hline
+& $\nabla\mathcal{L}$ & $W_{1_1}$ & $W_{1_2}$ & $W_{1_3}$ & $b_1$ \\
+& & 1 & 1 & 1 & 3 \\ \hline
+$F$ & N & 0 & 0 & 0 & 0 \\ \hline
+$h_1$ & N & 		$-x\sigma'(W_{1_1}x+b_{1_1})$ & 0 & 0 & $-\sigma'(W_{1_1}x+b_{1_1})$ \\
+      & N & 0 & 	$-x\sigma'(W_{1_2}x+b_{1_2})$ & 0 &  	$-\sigma'(W_{1_2}x+b_{1_2})$ \\
+      & N & 0 & 0 & $-x\sigma'(W_{1_3}x+b_{1_3})$ &  		$-\sigma'(W_{1_3}x+b_{1_3})$ \\ \hline
+$h_2$ & N & 0 & 0 & 0 & 0 \\
+      & N & 0 & 0 & 0 & 0 \\
+      & N & 0 & 0 & 0 & 0 \\ \hline \\ \hline
+& $\nabla\mathcal{L}$ & $W_{2_1}$ & $W_{2_2}$ & $W_{2_3}$ & $b_2$ \\
+& & 3 & 3 & 3 & 3 \\ \hline
+$F$ & N & 0 & 0 & 0 & 0 \\ \hline
+$h_1$ & N & 0 & 0 & 0 & 0 \\
+      & N & 0 & 0 & 0 & 0 \\
+      & N & 0 & 0 & 0 & 0 \\ \hline
+$h_2$ & N & 		$-z_1\sigma'(W_{2_1}z + b_{2_1})$ & 0 & 0 & $-\sigma'(W_{2_1}x+b_{2_1})$ \\
+      & N & 0 & 	$-z_1\sigma'(W_{2_2}z + b_{2_2})$ & 0 & 	$-\sigma'(W_{2_2}x+b_{2_2})$ \\
+      & N & 0 & 0 & $-z_1\sigma'(W_{2_3}z + b_{2_3})$ & 		$-\sigma'(W_{2_3}x+b_{2_3})$ \\ \hline \\ \hline
+& $\nabla\mathcal{L}$ & $W_3$ & / & /& $b_3$ \\
+& & 3 & 0 & 0 & 1 \\ \hline
+$F$ & N & $-z_2/\sqrt{c}$ & 0 & 0 & $-1/\sqrt{c}$ \\ \hline
+$h_1$ & N & 0 & 0 & 0 & 0 \\
+      & N & 0 & 0 & 0 & 0 \\
+      & N & 0 & 0 & 0 & 0 \\ \hline
+$h_2$ & N & 0 & 0 & 0 & 0 \\
+      & N & 0 & 0 & 0 & 0 \\
+      & N & 0 & 0 & 0 & 0 \\ \hline
+      
+\end{tabular}
+
+\newpage
+Square Diagonal Matrixes
+
+\begin{tabular}{ r r | c c c }
+& $\nabla\mathcal{L}$ & $z_{1_1}$ & $z_{1_2}$ & $z_{1_3}$\\
+& & N & N & N \\ \hline
+$F$ & N & 0 & 0 & 0 \\ \hline
+$h_1$ & N & 1 & 0 & 0 \\
+      & N & 0 & 1 & 0  \\
+      & N & 0 & 0 & 1  \\ \hline
+$h_2$ & N & $-W_{2_{1,1}}\sigma'(W_{2_1}z_1+b_{2_1})$ & $-W_{2_{1,2}}\sigma'(W_{2_1}z_1+b_{2_1})$ & $-W_{2_{1,3}}\sigma'(W_{2_1}z_1+b_{2_1})$\\
+      & N & $-W_{2_{2,1}}\sigma'(W_{2_2}z_1+b_{2_2})$ & $-W_{2_{2,2}}\sigma'(W_{2_2}z_1+b_{2_2})$ & $-W_{2_{2,3}}\sigma'(W_{2_2}z_1+b_{2_2})$\\
+      & N & $-W_{2_{3,1}}\sigma'(W_{2_3}z_1+b_{2_3})$ & $-W_{2_{3,2}}\sigma'(W_{2_3}z_1+b_{2_3})$ & $-W_{2_{3,3}}\sigma'(W_{2_3}z_1+b_{2_3})$\\ \hline \\
+& $\nabla\mathcal{L}$ & $z_{2_1}$ & $z_{2_2}$ & $z_{2_3}$\\
+& & N & N & N \\ \hline
+$F$ & N & -$W_{3_1}/\sqrt{c}$ & -$W_{3_2}/\sqrt{c}$ & -$W_{3_3}/\sqrt{c}$ \\ \hline
+$h_1$ & N & 0 & 0 & 0 \\
+      & N & 0 & 0 & 0  \\
+      & N & 0 & 0 & 0  \\ \hline
+$h_2$ & N & 1 & 0 & 0 \\
+      & N & 0 & 1 & 0  \\
+      & N & 0 & 0 & 1  \\ \hline
+\end{tabular}
+
+\begin{tabular}{r r | c}
+& $\nabla\mathcal{L}$ & $\lambda$ \\
+& & 6N \\ \hline
+$F$ & N & 0\\ \hline
+$h_1$ & N & $1/c$  \\
+      & N & $1/c$ \\
+      & N & $1/c$ \\ \hline
+$h_2$ & N & $1/c$ \\
+      & N & $1/c$ \\
+      & N & $1/c$ \\ \hline
+
+\end{tabular}
+
+\end{document}

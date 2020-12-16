@@ -1,6 +1,6 @@
 N = 21;
 xin = linspace(0,1,21);
-y = -sin(.8*pi*x);
+y = -sin(.8*pi*xin);
 
 w1 = sdpvar(3,1);
 b1 = sdpvar(3,1);
