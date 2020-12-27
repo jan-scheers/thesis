@@ -1,9 +1,11 @@
-\documentclass[11pt]{article}
-\usepackage{amsmath,geometry}
-%Gummi|065|=)
+\chapter{Python implementation}
+\label{cha:2}
+In this chapter the algorithm is examined more closely and implemented into python.
 
-\begin{document}
+\section{Augmented lagrangian method}
+Instead of using fmincon, now an augmented lagrangian method is used to solve the optimal control problem. In this method the optimal control problem is solved as a nonlinear least squares problem.
 
+The OCP equations
 \begin{equation*}
 	\begin{aligned}
 	& \underset{W}{\text{minimize}}
@@ -13,6 +15,7 @@
 	\end{aligned}
 \end{equation*}
 
+are represented as
 
 \begin{equation*}
 	\begin{aligned}
@@ -22,6 +25,8 @@
 	& &  h(x) = 0
 	\end{aligned}
 \end{equation*}
+
+The ALM method solves this problem by adding both a penalty and a lagrangian term. After rewriting, the nonlinear least squares problem looks like this
 
 \begin{equation*}
 	\begin{aligned}
@@ -35,77 +40,12 @@
 		\end{bmatrix} \Big|\Big|^2
 	\end{aligned}
 \end{equation*}
-Find
-\begin{equation}
-\begin{aligned}
-x^k & \text{ s. t. }&  ||\nabla_k\mathcal{L}_{c_k}(x^k,\lambda^k)||_2 \leq \epsilon
-\end{aligned}
-\end{equation}
-\begin{equation}
-\lambda^{k+1} = \lambda^k + c_kh(x^k)
-\end{equation}
-\begin{equation}
-\begin{aligned}
-F   &= y - (W_3z_2+b_3) \\
-h_1 &= z_1 - \sigma(W_1x+b_1) \\
-h_2 &= z_2 - \sigma(W_2z_1+b_2)
-\end{aligned}
-\end{equation}
 
-\begin{tabular}{r r | c c c c}\hline
-& $\nabla\mathcal{L}$ & $W_{1_1}$ & $W_{1_2}$ & $W_{1_3}$ & $b_1$ \\
-& & 1 & 1 & 1 & 3 \\ \hline
-$F$ & N & 0 & 0 & 0 & 0 \\ \hline
-$h_1$ & N & 		$-x\sigma'(W_{1_1}x+b_{1_1})$ & 0 & 0 & $-\sigma'(W_{1_1}x+b_{1_1})$ \\
-      & N & 0 & 	$-x\sigma'(W_{1_2}x+b_{1_2})$ & 0 &  	$-\sigma'(W_{1_2}x+b_{1_2})$ \\
-      & N & 0 & 0 & $-x\sigma'(W_{1_3}x+b_{1_3})$ &  		$-\sigma'(W_{1_3}x+b_{1_3})$ \\ \hline
-$h_2$ & N & 0 & 0 & 0 & 0 \\
-      & N & 0 & 0 & 0 & 0 \\
-      & N & 0 & 0 & 0 & 0 \\ \hline \\ \hline
-& $\nabla\mathcal{L}$ & $W_{2_1}$ & $W_{2_2}$ & $W_{2_3}$ & $b_2$ \\
-& & 3 & 3 & 3 & 3 \\ \hline
-$F$ & N & 0 & 0 & 0 & 0 \\ \hline
-$h_1$ & N & 0 & 0 & 0 & 0 \\
-      & N & 0 & 0 & 0 & 0 \\
-      & N & 0 & 0 & 0 & 0 \\ \hline
-$h_2$ & N & 		$-z_1\sigma'(W_{2_1}z + b_{2_1})$ & 0 & 0 & $-\sigma'(W_{2_1}x+b_{2_1})$ \\
-      & N & 0 & 	$-z_1\sigma'(W_{2_2}z + b_{2_2})$ & 0 & 	$-\sigma'(W_{2_2}x+b_{2_2})$ \\
-      & N & 0 & 0 & $-z_1\sigma'(W_{2_3}z + b_{2_3})$ & 		$-\sigma'(W_{2_3}x+b_{2_3})$ \\ \hline \\ \hline
-& $\nabla\mathcal{L}$ & $W_3$ & / & /& $b_3$ \\
-& & 3 & 0 & 0 & 1 \\ \hline
-$F$ & N & $-z_2/\sqrt{c}$ & 0 & 0 & $-1/\sqrt{c}$ \\ \hline
-$h_1$ & N & 0 & 0 & 0 & 0 \\
-      & N & 0 & 0 & 0 & 0 \\
-      & N & 0 & 0 & 0 & 0 \\ \hline
-$h_2$ & N & 0 & 0 & 0 & 0 \\
-      & N & 0 & 0 & 0 & 0 \\
-      & N & 0 & 0 & 0 & 0 \\ \hline
-      
-\end{tabular}
+The method then proceeds by optimizing for $x^k$ and then updating the lagrangian parameters
 
-\newpage
-Square Diagonal Matrixes
+To solve this, the Jacobian matrix must be calculated. It has a relatively sparse structure because there are no distant connections in the neural net, each layer is only connected to the next one and the previous one.
 
-\begin{tabular}{ r r | c c c }
-& $\nabla\mathcal{L}$ & $z_{1_1}$ & $z_{1_2}$ & $z_{1_3}$\\
-& & N & N & N \\ \hline
-$F$ & N & 0 & 0 & 0 \\ \hline
-$h_1$ & N & 1 & 0 & 0 \\
-      & N & 0 & 1 & 0  \\
-      & N & 0 & 0 & 1  \\ \hline
-$h_2$ & N & $-W_{2_{1,1}}\sigma'(W_{2_1}z_1+b_{2_1})$ & $-W_{2_{1,2}}\sigma'(W_{2_1}z_1+b_{2_1})$ & $-W_{2_{1,3}}\sigma'(W_{2_1}z_1+b_{2_1})$\\
-      & N & $-W_{2_{2,1}}\sigma'(W_{2_2}z_1+b_{2_2})$ & $-W_{2_{2,2}}\sigma'(W_{2_2}z_1+b_{2_2})$ & $-W_{2_{2,3}}\sigma'(W_{2_2}z_1+b_{2_2})$\\
-      & N & $-W_{2_{3,1}}\sigma'(W_{2_3}z_1+b_{2_3})$ & $-W_{2_{3,2}}\sigma'(W_{2_3}z_1+b_{2_3})$ & $-W_{2_{3,3}}\sigma'(W_{2_3}z_1+b_{2_3})$\\ \hline \\
-& $\nabla\mathcal{L}$ & $z_{2_1}$ & $z_{2_2}$ & $z_{2_3}$\\
-& & N & N & N \\ \hline
-$F$ & N & -$W_{3_1}/\sqrt{c}$ & -$W_{3_2}/\sqrt{c}$ & -$W_{3_3}/\sqrt{c}$ \\ \hline
-$h_1$ & N & 0 & 0 & 0 \\
-      & N & 0 & 0 & 0  \\
-      & N & 0 & 0 & 0  \\ \hline
-$h_2$ & N & 1 & 0 & 0 \\
-      & N & 0 & 1 & 0  \\
-      & N & 0 & 0 & 1  \\ \hline
-\end{tabular}
+Neural networks obviously have many possible architectures, so a simple fully connected rectangular feedforward network is considered. It has an input dimension I, an output dimension O, and it has D hidden layers of width W. The weight matrixes have $IxW + OxW + (D-1)xWxW$ parameters, the bias vectors have $DxW+O$ parameters and the state vectors have $DxWxN$ parameters. On the other hand $\mathcal{L}_c(x,\lambda)$ will have an output dimension of $DxWxN + OxN$. The dimension of the Jacobian will be $(D.W.N + O.N)x(D.W.N + O + (D+I+O)W + (D-1)W^2)$. Therefore the Jacobian will be taller than it is wide when $N >= 1 + (D+I+O)W/O + (D-1)W^2/0$. Written out completely the Jacobian will look like this:
 
 \newpage
 
@@ -137,10 +77,10 @@ $h_{D}$ & W*N & 0 & 0 &...& 0 & 0 \\ \hline \\ \hline
 
 & $\nabla\mathcal{L}$ & $W_{D_1}$ &  $W_{D_2}$  &...&  $W_{D_O}$ & $b_D$ \\
 & & W & W &...& W & O \\ \hline
-$F$ & N & $-z_D\sigma_O'(W_{D_1}x+b_{D_1})/\sqrt{c}$ & 0 &...& 0 & $-\sigma_O'(W_{D_1}x+b_{D_1})/\sqrt{c}$ \\
-    & N & 0 & $-z_D\sigma_O'(W_{D_2}x+b_{D_2})/\sqrt{c}$ &...& 0 & $-\sigma_O'(W_{D_2}x+b_{D_2})/\sqrt{c}$ \\
+$F$ & N & $-\frac{z_D}{\sqrt{c}}\sigma_O'(W_{D_1}x+b_{D_1})$ & 0 &...& 0 & $-\frac{1}{\sqrt{c}}\sigma_O'(W_{D_1}x+b_{D_1})$ \\
+    & N & 0 & $-\frac{z_D}{\sqrt{c}}\sigma_O'(W_{D_2}x+b_{D_2})$ &...& 0 & $-\frac{1}{\sqrt{c}}\sigma_O'(W_{D_2}x+b_{D_2})$ \\
       &...&...&...&...&...&... \\
-    & N & 0 & 0 &...& $-z_D\sigma_O'(W_{D_O}x+b_{D_O})/\sqrt{c}$ & $-\sigma_O'(W_{D_O}x+b_{D_O})/\sqrt{c}$ \\ \hline
+    & N & 0 & 0 &...& $-\frac{z_D}{\sqrt{c}}\sigma_O'(W_{D_O}x+b_{D_O})$ & $-\frac{1}{\sqrt{c}}\sigma_O'(W_{D_O}x+b_{D_O})$ \\ \hline
 $h_1$ & W*N & 0 & 0 &...& 0 & 0 \\
 ...   & ... &...&...&...&...&...\\ 
 $h_{D}$ & W*N & 0 & 0 &...& 0 & 0 \\ \hline
@@ -180,4 +120,12 @@ $h_D$ & N & 1 & 0 &...& 0 \\
       & N & 0 & 0 &...& 1  \\ \hline
 \end{tabular}
 
-\end{document}
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\textwidth]{jac.png}
+  \caption{Nonzero elements of jacobian, for network with I=2,O=2,W=3,D=2,N=7}
+  \label{jac}
+\end{figure}
+
+
+
