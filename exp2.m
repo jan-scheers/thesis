@@ -2,23 +2,23 @@ N = 21;
 xin = linspace(0,1,21);
 y = -sin(.8*pi*xin);
 
-w1 = sdpvar(3,1);
-b1 = sdpvar(3,1);
-x1 = sdpvar(3,N);
-w2 = sdpvar(3,3,'full');
-b2 = sdpvar(3,1);
-x2 = sdpvar(3,N);
-w3 = sdpvar(3,1);
+w1 = sdpvar(8,1);
+b1 = sdpvar(8,1);
+x1 = sdpvar(8,N);
+w2 = sdpvar(8,8,'full');
+b2 = sdpvar(8,1);
+x2 = sdpvar(8,N);
+w3 = sdpvar(8,1);
 b3 = sdpvar(1,1);
 
 
-assign(w1,2*rand(3,1)-1);
-assign(b1,2*rand(3,1)-1);
+assign(w1,2*rand(8,1)-1);
+assign(b1,2*rand(8,1)-1);
 assign(x1,tansig(value(w1*xin+repmat(b1,1,N))));
-assign(w2,2*rand(3,3)-1);
-assign(b2,2*rand(3,1)-1);
+assign(w2,2*rand(8,8)-1);
+assign(b2,2*rand(8,1)-1);
 assign(x2,tansig(value(w2*x1 +repmat(b2,1,N))));
-assign(w3,2*rand(3,1)-1);
+assign(w3,2*rand(8,1)-1);
 assign(b3,2*rand(1,1)-1);
 
 res = w3'*x2 + b3 - y;

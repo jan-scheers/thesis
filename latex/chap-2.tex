@@ -1,11 +1,9 @@
 \chapter{Python implementation}
 \label{cha:2}
-In this chapter the algorithm is examined more closely and implemented into python.
+In this chapter the simultaneous approach is examined more closely and implemented into python.
 
-\section{Augmented lagrangian method}
-Instead of using fmincon, now an augmented lagrangian method is used to solve the optimal control problem. In this method the optimal control problem is solved as a nonlinear least squares problem.
-
-The OCP equations
+\section{Augmented Lagrangian Method}
+Instead of using fmincon, now an Augmented Lagrangian Method is used to solve the optimal control problem. The OCP equations
 \begin{equation*}
 	\begin{aligned}
 	& \underset{W}{\text{minimize}}
@@ -15,7 +13,7 @@ The OCP equations
 	\end{aligned}
 \end{equation*}
 
-are represented as
+are represented as a nonlinear least squares problem
 
 \begin{equation*}
 	\begin{aligned}
@@ -41,11 +39,22 @@ The ALM method solves this problem by adding both a penalty and a lagrangian ter
 	\end{aligned}
 \end{equation*}
 
-The method then proceeds by optimizing for $x^k$ and then updating the lagrangian parameters
+In the inner loop of the algorithm the least squares problem is solved for $x^k$ up to a certain tolerance.
 
-To solve this, the Jacobian matrix must be calculated. It has a relatively sparse structure because there are no distant connections in the neural net, each layer is only connected to the next one and the previous one.
+\begin{equation}
+x^k \text{ s. t. } ||\nabla_k\mathcal{L}_{c_k}(x^k,\lambda^k)||_2 \leq \epsilon
+\end{equation}
 
-Neural networks obviously have many possible architectures, so a simple fully connected rectangular feedforward network is considered. It has an input dimension I, an output dimension O, and it has D hidden layers of width W. The weight matrixes have $IxW + OxW + (D-1)xWxW$ parameters, the bias vectors have $DxW+O$ parameters and the state vectors have $DxWxN$ parameters. On the other hand $\mathcal{L}_c(x,\lambda)$ will have an output dimension of $DxWxN + OxN$. The dimension of the Jacobian will be $(D.W.N + O.N)x(D.W.N + O + (D+I+O)W + (D-1)W^2)$. Therefore the Jacobian will be taller than it is wide when $N >= 1 + (D+I+O)W/O + (D-1)W^2/0$. Written out completely the Jacobian will look like this:
+The langrangian parameters $lambda$ are then updated using the rule:
+\begin{equation}
+\lambda^{k+1} = \lambda^k + c_kh(x^k)
+\end{equation}
+A new penalty parameter $c^{k+1}$ is chosen and the algorithm continues. REFER nocedal wright, 
+
+\section{Jacobian}
+To solve the least squares problem, the Jacobian matrix must be calculated. It has a relatively sparse structure because there are no distant connections in the neural net, each layer is only connected to the next one and the previous one.
+
+Neural networks obviously have many possible architectures, so a simple fully connected rectangular feedforward network is considered. It has an input dimension I, an output dimension O, and it has D hidden layers of width W. The weight matrixes have $IxW + OxW + (D-1)xWxW$ parameters, the bias vectors have $DxW+O$ parameters and the state vectors have $DxWxN$ parameters. On the other hand $\mathcal{L}_c(x,\lambda)$ will have an output dimension of $DxWxN + OxN$. The dimension of the Jacobian will be $(D.W.N + O.N)x(D.W.N + O + (D+I+O)W + (D-1)W^2)$. Therefore the Jacobian will be taller than it is wide when $N >= 1 + (D+I+O)W/O + (D-1)W^2/0$. Written out completely the Jacobian will look like .... Figure 
 
 \newpage
 
@@ -88,7 +97,7 @@ $h_{D}$ & W*N & 0 & 0 &...& 0 & 0 \\ \hline
 \end{tabular}
 
 \newpage
-Square Diagonal Matrixes
+Square Diagonal Matrices
 
 \begin{tabular}{ r r | c c c c }
 & $\nabla\mathcal{L}$ & $z_{i_1}$ & $z_{i_2}$ &...& $z_{i_W}$\\
@@ -126,6 +135,11 @@ $h_D$ & N & 1 & 0 &...& 0 \\
   \caption{Nonzero elements of jacobian, for network with I=2,O=2,W=3,D=2,N=7}
   \label{jac}
 \end{figure}
+How to read figure
 
+\section{Algorithmic Verification of Jacobian}
 
+\section{Alternative Representation}
+
+In this section we explain an alternative representation which is mathematically the same.
 

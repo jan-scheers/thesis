@@ -21,12 +21,12 @@ obj = res*res';
 % 
 f1 = (x1-(w1*xin+repmat(b1,1,N)));
 %f2 = (x2-(w2*x1 +repmat(b2,1,N)));
-con = [f1 >= 0; x1 >= 0; f1.*x1 <= 0;];
+%con = [f1 >= 0; x1 >= 0; f1.*x1 <= 0;];
 %        f2 >= 0; x2 >= 0; f2.*x2 <= 0];
 % con = [x1 == max(w1*xin+repmat(b1,1,N),0);
 %        x2 == max(w2*x1 +repmat(b2,1,N),0)];
-% con = [x1 == tansig(w1*xin+repmat(b1,1,N));
-%        x2 == tansig(w2*x1 +repmat(b2,1,N))];
+con = [x1 == tansig(w1*xin+repmat(b1,1,N));
+        x2 == tansig(w2*x1 +repmat(b2,1,N))];
 ops = sdpsettings('usex0',1);
 ops.fmincon.MaxFunEvals = 20000;
 ops.fmincon.MaxIter = 200;
