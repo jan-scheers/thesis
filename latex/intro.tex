@@ -75,18 +75,24 @@ A neural network can also be interpreted as a dynamical system.
 
 In this way optimization methods from control theory can be applied. In particular, training a neural network can be formulated as the following Optimal Control Problem (OCP)
 
-\begin{equation*}
+\begin{equation}
 	\begin{aligned}
 	& \underset{W}{\text{minimize}}
 	& & \sum\limits_{j=0}^{N}||W_Lz_L^j - y^j||^2 \\
 	& \text{subject to}
 	& & z_{k+1}^j = \max(W_kz_k^j,0), &k = 0,\ldots,L-1,j = 1,\ldots,N
 	\end{aligned}
-\end{equation*}
+	\label{ocp-eq}
+\end{equation}
+
 
 There are two main direct approaches to solving an OCP. First is the sequential approach, where the states are eliminated using the dynamics. This is equivalent to the backpropagation algorithm which is the current standard method. [ref mizutani]
 
 The other approach is the simultaneous approach, where the state variables and the dynamics are kept as constraints. In control theory this approach often works better for highly nonlinear problems, which is certainly the case for training neural networks. The simultaneous approach is novel to neural networks and will be the topic of this thesis.
 
-The disadvantage of this method is the number of variables that need to be optimized is much larger. For a fully connected neural network of width $W$, each layer will contain $W^2$ weights. Combined with a depth $D$, that gives approximately $W^2D$ weight variables to be optimized for both the backpropagation and simultaneous approach. Adding the states as variables however adds another $WDN$ variables, where $N$ is the number of samples in a training batch. The advantage of this method is that relaxing the states makes the problem more smooth, and will hopefully allow the optimization to converge more often to a good solution and not land in a bad local minimum. Topic of the thesis to investigate this
+The disadvantage of this method is the number of variables that need to be optimized is much larger. For a fully connected neural network of width $W$, each layer will contain $W^2$ weights. Combined with a depth $D$, that gives approximately $W^2D$ weight variables to be optimized for both the backpropagation and simultaneous approach. Adding the states as variables however adds another $WDN$ variables, where $N$ is the number of samples in a training batch. The advantage of this method is that relaxing the states makes the problem more smooth, and will hopefully allow the optimization to converge more often to a good solution and not land in a bad local minimum.
+
+\section{Goal of the Thesis}
+
+
 

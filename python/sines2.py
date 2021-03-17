@@ -56,12 +56,12 @@ def solve_ls(u,fun,jac,tol):
 
 
 
-I,O,W,D,N, = 1,1,3,2,21
+I,O,W,D,N, = 1,1,8,2,21
 mu = 10
 
 shape = (W,D,I,O)
-sigma  = lambda x: np.tanh(x)
-sigma_ = lambda x: 2/(np.cosh(2*x)+1)
+sigma  = lambda x: np.maximum(x,0,x)
+sigma_ = lambda x: np.greater(x,0,x)
 
 tau  = lambda x: x
 tau_ = lambda x: np.ones(x.shape)
@@ -90,7 +90,7 @@ print(np.allclose(J,J_U))
 
 mu = 10
 eta,omega = np.power(1/mu,0.1),1/mu
-eta_ = 1e-6
+eta_ = 1e-9
 for k in range(10):
     fun = lambda u: nn.eval_L(u,mu,l)
     jac = lambda u: nn.eval_J_L(u,mu,l)
@@ -112,7 +112,6 @@ for k in range(10):
         
 y,_ = nn.sim(u)
 
-print(n_u, n_u-D*W*N)
 pyplot.plot(x[0,:].ravel(),nn.y[0,:].ravel(),'k+',x[0,:].ravel(),y[0,:].ravel(),'r-')
 pyplot.show()
 

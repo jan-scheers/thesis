@@ -1,9 +1,9 @@
 \chapter{Python implementation}
 \label{cha:2}
-In this chapter the simultaneous approach is examined more closely and implemented into python.
+In this chapter the simultaneous approach is examined more closely and implemented into python. Instead of using \texttt{fmincon} which is a very general black box method, a more specific algorithm should both run faster and converge more often. For this the Augmented Lagrangian Method was chosen.
 
 \section{Augmented Lagrangian Method}
-Instead of using fmincon, now an Augmented Lagrangian Method is used to solve the optimal control problem. The OCP equations
+Instead of using fmincon, now an Augmented Lagrangian Method (ALM) is used to solve the optimal control problem. The OCP equations
 \begin{equation*}
 	\begin{aligned}
 	& \underset{W}{\text{minimize}}
@@ -26,7 +26,7 @@ are represented as a nonlinear least squares problem
 
 The ALM method solves this problem by adding both a penalty and a lagrangian term. After rewriting, the nonlinear least squares problem looks like this
 
-\begin{equation*}
+\begin{equation}
 	\begin{aligned}
 		\mathcal{L}_c(x,\lambda)
 		&= \frac{1}{2} ||F(x)||^2_2 + <\lambda,h(x)> + \frac{c}{2} || h(x) ||^2_2 \\
@@ -37,7 +37,8 @@ The ALM method solves this problem by adding both a penalty and a lagrangian ter
 			h(x) + \lambda/c
 		\end{bmatrix} \Big|\Big|^2
 	\end{aligned}
-\end{equation*}
+	\label{loss}
+\end{equation}
 
 In the inner loop of the algorithm the least squares problem is solved for $x^k$ up to a certain tolerance.
 
@@ -45,20 +46,46 @@ In the inner loop of the algorithm the least squares problem is solved for $x^k$
 x^k \text{ s. t. } ||\nabla_k\mathcal{L}_{c_k}(x^k,\lambda^k)||_2 \leq \epsilon
 \end{equation}
 
-The langrangian parameters $lambda$ are then updated using the rule:
+The Langrangian parameters $lambda$ are then updated using the rule:
 \begin{equation}
 \lambda^{k+1} = \lambda^k + c_kh(x^k)
 \end{equation}
-A new penalty parameter $c^{k+1}$ is chosen and the algorithm continues. REFER nocedal wright, 
+A new penalty parameter $c^{k+1}$ is chosen and the algorithm continues. REFER nocedal wright,
+
+\begin{figure}
+     \centering
+     \begin{subfigure}[b]{0.8\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{alm-tanh}
+         \caption{Training performance of simultaneous approach, with tansig activation function}
+         \label{alm-tanh}
+     \end{subfigure}
+     \begin{subfigure}[b]{0.8\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{alm-relu}
+         \caption{Training performance of simultaneous approach, with ReLU activation function}
+         \label{alm-relu}
+     \end{subfigure}
+     \begin{subfigure}[b]{0.8\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{back-relu}
+         \caption{Training performance of backpropagation, with ReLU activation function}
+         \label{}
+     \end{subfigure}
+        \caption{Performance of algorithms for simple regression problem}
+        \label{back-relu}
+\end{figure}
 
 \section{Jacobian}
 To solve the least squares problem, the Jacobian matrix must be calculated. It has a relatively sparse structure because there are no distant connections in the neural net, each layer is only connected to the next one and the previous one.
 
-Neural networks obviously have many possible architectures, so a simple fully connected rectangular feedforward network is considered. It has an input dimension I, an output dimension O, and it has D hidden layers of width W. The weight matrixes have $IxW + OxW + (D-1)xWxW$ parameters, the bias vectors have $DxW+O$ parameters and the state vectors have $DxWxN$ parameters. On the other hand $\mathcal{L}_c(x,\lambda)$ will have an output dimension of $DxWxN + OxN$. The dimension of the Jacobian will be $(D.W.N + O.N)x(D.W.N + O + (D+I+O)W + (D-1)W^2)$. Therefore the Jacobian will be taller than it is wide when $N >= 1 + (D+I+O)W/O + (D-1)W^2/0$. Written out completely the Jacobian will look like .... Figure 
+Neural networks obviously have many possible architectures, so a simple fully connected rectangular feedforward network is considered. It has an input dimension I, an output dimension O, and it has D hidden layers of width W. The weight matrixes have $I\times W + O\times W + (D-1)\times W\times W$ parameters, the bias vectors have $D\times W+O$ parameters and the state vectors have $D\times W\times N$ parameters. On the other hand $\mathcal{L}_c(x,\lambda)$ will have an output dimension of $D\times W \times N + O\times N$. The dimension of the Jacobian will be $(D \times W\times N + O\times N)\times (D\times W\times N + O + (D+I+O)\times W + (D-1)\times W^2)$. Therefore the Jacobian will be taller than it is wide when $N \geq 1 + (D+I+O)\times W/O + (D-1)\times W^2/O$. Written out completely the Jacobian will look like Table \ref{jac-tab}
 
 \newpage
-
-\footnotesize
+\begin{adjustwidth}{2000pt}{2000pt}
+\begin{table}
+\tiny
+\centering
 \begin{tabular}{r r | c c c c c}\hline
 
 & $\nabla\mathcal{L}$ & $W_{0_1}$ & $W_{0_2}$ & ... & $W_{0_W}$ & $b_0$ \\
@@ -96,7 +123,6 @@ $h_{D}$ & W*N & 0 & 0 &...& 0 & 0 \\ \hline
       
 \end{tabular}
 
-\newpage
 Square Diagonal Matrices
 
 \begin{tabular}{ r r | c c c c }
@@ -128,18 +154,35 @@ $h_D$ & N & 1 & 0 &...& 0 \\
       &...&...&...&...&...\\ 
       & N & 0 & 0 &...& 1  \\ \hline
 \end{tabular}
+\caption{Jacobian of feedforward neural network}
+\label{jac-tab}
 
+\end{table}
+
+\end{adjustwidth}
 \begin{figure}[p]
   \centering
   \includegraphics[width=\textwidth]{jac.png}
-  \caption{Nonzero elements of jacobian, for network with I=2,O=2,W=3,D=2,N=7}
+  \caption{Nonzero elements of Jacobian, for network with I=2,O=2,W=3,D=2,N=7}
   \label{jac}
 \end{figure}
-How to read figure
 
 \section{Algorithmic Verification of Jacobian}
+The Jacobian in the previous section was derived by hand. In this section will be explained how the Jacobian was verified algorithmically.
+
+By Algorithmic Differentation the numerical value for the Jacobian can be deduced. For this the AlgoPy python module was used. By adding code from this packet to the calculation of the neural network, the Jacobian is calculated along with the network. This result was then compared to the analytical result for a number of different network configurations, confirming them to be equal within a small tolerance. The code is available at https://github.com/jan-scheers/thesis 
 
 \section{Alternative Representation}
 
-In this section we explain an alternative representation which is mathematically the same.
+In this section we explain an alternative representation which is mathematically the same. Figure \ref{jac2} shows the Jacobian, but with the rows corresponding to the loss function put at the bottom. It shows a diagonal structure, because each layer in this feedforward net is only connected to the adjacent layers.
 
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\textwidth]{jac2.png}
+  \caption{Nonzero elements of Jacobian, for network with I=2,O=2,W=3,D=2,N=7, rearranged}
+  \label{jac2}
+\end{figure}
+
+\section{Testing}
+
+In this section the tests from the previous chapter are run again, this time using the ALM algorithm. The least squares problem in the inner loop is solved using the \texttt{least\_squares} method in \texttt{numpy 1.20.1}, which is provided with the Jacobian calculated in the previous section. This time the stopping criterion is that the cost function described in equation \ref{loss} is less than a tolerance of $1e^{-6}$. Figure \ref{alm-tanh} and Figure \ref{alm-relu} show the result of these two tests.

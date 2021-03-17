@@ -317,6 +317,9 @@ print(np.allclose(J,J_U))
 
 Jnz = J != 0
 
+T = Jnz[0:O*N,:]
+Jnz = Jnz[O*N+1:-1,:]
+Jnz = np.concatenate((Jnz,T))
 pyplot.matshow(Jnz,cmap="binary")
 pyplot.show()
 
