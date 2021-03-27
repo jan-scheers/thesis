@@ -3,7 +3,7 @@
 In this chapter the simultaneous approach is examined more closely and implemented into python. Instead of using \texttt{fmincon} which is a very general black box method, a more specific algorithm should both run faster and converge more often. For this the Augmented Lagrangian Method was chosen.
 
 \section{Augmented Lagrangian Method}
-Instead of using fmincon, now an Augmented Lagrangian Method (ALM) is used to solve the optimal control problem. The OCP equations
+Instead of using fmincon, now an Augmented Lagrangian Method (ALM) is used to solve the optimal control problem. The Optimal Control Problem described in equation \ref{ocp-eq}, which is printed here again:
 \begin{equation*}
 	\begin{aligned}
 	& \underset{W}{\text{minimize}}
@@ -13,7 +13,7 @@ Instead of using fmincon, now an Augmented Lagrangian Method (ALM) is used to so
 	\end{aligned}
 \end{equation*}
 
-are represented as a nonlinear least squares problem
+is represented as a nonlinear least squares problem
 
 \begin{equation*}
 	\begin{aligned}

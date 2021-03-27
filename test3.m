@@ -1,3 +1,4 @@
+
 clear
 N = 21;W = 10;
 xin = linspace(0,1,21);

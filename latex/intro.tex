@@ -3,22 +3,24 @@
 
 Artifical Neural Networks (ANNs) are a very popular machine learning model. They are known to be very expressive, leading to low statistical bias. With enough neurons, ANNs can approximate any function.  They are especially useful for learning from very large data sets. But it is not entirely clear what the optimization of an ANN converges to, as the loss surface is highly non-convex. Nonetheless a number of results show that for wide enough networks, there are few "bad" local minima.
 
-ANNs are composed of 'neurons', which are in some ways analogous to biological neurons.Each neuron is a nonlinear function transforming the weighted sum of its inputs:
-\begin{equation*}
-      y = \sigma(w_1x_1+w_2x_2+...+w_nx_n)
-\end{equation*}
+ANNs are composed of 'neurons', which are in some ways analogous to biological neurons.Each neuron is a nonlinear function transforming the weighted sum of its inputs and a bias:
+\begin{equation}
+      y = \sigma(w_1x_1+w_2x_2+...+w_nx_n + b)
+\end{equation}
 
-With $w_i$ the weights, $x_i$ the inputs and $\sigma$ the activation function. This is the McCulloch-Pitts neuron model.[REF] The most commonly used activation function $\sigma$ is the Rectified Linear Unit (ReLU):
+$w_i$ are the weights, $x_i$ are the inputs to the neuron, which come either from a previous neuron, or are fed into the network, $\sigma$ is the activation function, and finally a bias $b$ is also added to the sum. This is the McCulloch-Pitts neuron model.[REF] The most commonly used activation function $\sigma$ is the Rectified Linear Unit (ReLU):
 
-\begin{equation*}
+\begin{equation}
       \sigma(x) = x^+ = \max(0,x)
-\end{equation*}
+\end{equation}
 
-A visual representation is shown in figure \ref{neural}b. A full network is built by connecting layers of neurons as shown in figure \ref{neural}a. An ANN can also be expressed as a combination of function composition and matrix multiplication.
+Many other activation functions are possible, such as the sigmoid function ($\frac{1}{1+e{-x}}$) or the tansig function ($tanh(x)$).
 
-\begin{equation*}
+A visual representation is shown in figure \ref{neural}b. A full network is built by connecting layers of neurons as shown in figure \ref{neural}a. An ANN can also be expressed as a combination of function composition and matrix multiplication, ignoring for a moment the bias vectors.
+
+\begin{equation}
          f(W,x) = W_L\sigma(W_{L-1}\sigma(...W_1\sigma(W_0x)...))
-\end{equation*}
+\end{equation}
 
 where $W_n$ are the matrixes of the connection weights and $L$ is the depth of the network. 
 
@@ -36,8 +38,44 @@ where $W_n$ are the matrixes of the connection weights and $L$ is the depth of t
 	\end{figure}
 
 \newpage
+
+\section{Neural Network Training}
+Training a neural network is an optimization problem as we will discuss in this section. Ruoyu Sun covers in \cite{sun2019optimization} the current theory and algorithms for optimizing deep neural networks, upon which much of this section is based.
+
+In a supervised learning problem a dataset of inputs and desired outputs is given: $x_i \in \mathbb{R}^{d_x}, y_i \in \mathbb{R}^{d_y}, i = 1,\dots,n$ with $x_i$ the input vectors, $y_i$ the desired output vectors and $n$ the number of data points. We want the network to predict the output $y_i$ based on the information in $x_i$, i.e. we want the network to learn the underlying mapping that connects the data. A standard fully connected network can be expressed as a combination of function composition and matrix multiplication as follows:
+
+
+\begin{equation}
+         f_W(x) = W_L\sigma(W_{L-1}\sigma(...W_1\sigma(W_0x)...))
+\end{equation}
+
+where $L$ is the depth of the network, $W_j$ are matrixes of dimension $d_j \times d_{j-1}, j=1 \dots L$ containing the connection weights and $\sigma$ is the activation function. The bias vectors $b_i$ have been omitted from this equation for clarity.
+
+We want to pick the parameters of the neural network so that the predicted output $\hat{y}_i = f_W(x_i)$ is as close as possible to the true output $y_i$ for a certain distance metric $\mathit{l(\cdot,\cdot)}$. Thus the optimization problem can be written as follows:
+
+\begin{equation}
+\begin{aligned}
+& \underset{W}{\text{minimize}}
+& F(W) &= \sum\limits_{j=0}^{N}l(y_j,f_W(x_j)) \\
+\end{aligned}
+\label{op-eq}
+\end{equation}
+
+In this thesis only regression problems will be considered, where $l(x,y)$ is the quadratic loss function $l(x,y) = ||x^2-y^2||$. For classification problems cross entropy loss is the most common cost function: $l(x,y) = x\log(y)+(1-x)\log(y)$.
+
+Most methods for solving equation \ref{op-eq} are based on gradient descent (GD). This algorithm uses the gradient of the loss function to search for a local minimum:
+\begin{equation}
+W_{k+1} = W_{k} - \eta_k\nabla F(W_k)
+\label{gd-eq}
+\end{equation}
+
+where $\eta_k$ is the step size (a.k.a. "learning rate") and $\nabla F(W_k)$ is the gradient of the loss function at the $k$-th iterate.  
+
 \section{Backpropagation}
-Backpropagation is the usual algorithm for training an ANN. Training of a network is done by minimizing the loss function $C$. For regression problems this will be often be a squared error loss, while for classification tasks the cross entropy is used.
+Backpropagation is the current standard algorithm for calculating the gradient in equation \ref{gd-eq}. It was discovered and popularised in the context of neural networks by Rumelhart, Hinton \& Williams (1986) \ref{Rumelhart1986}, but in the context of optimal control the techniques for calculating this gradient were discovered in 1960 by Kelley \ref{} and Bryson \ref{}. It has been shown that reformulatin
+
+
+Training of a network is done by minimizing the loss function $C$. For regression problems this will be often be a squared error loss, while for classification tasks the cross entropy is used.
 
 \begin{equation*}
 \begin{aligned}
@@ -48,10 +86,9 @@ Backpropagation is the usual algorithm for training an ANN. Training of a networ
 
 with $x^j$ the input vectors, $y^j$ the target output and $N$ the number of data points
 
-Backpropagation computes the gradient of the loss function $C$ with respect to the weight matrices $W$. It has two steps: in the first step the output of the network is calculated using the current weights and input v. The activation values and derivatives of each 
-Then the error is propagated backward and the gradient is calculated.
+Backpropagation computes the gradient of the loss function $C$ with respect to the weight matrices $W$. It has two steps: in the first step the output of the network is calculated using the current weights and inputs. The activation values and derivatives of each neuron are stored. Then the error and gradient are calculated from the end of the network to the start, i.e. backwards.
 
- Then any gradient descent method can be used to find the step update.
+Finally any gradient descent method can be used to find a step update. This is repeated until a stopping criterion is met.
 
 
 \section{Neural Networks in Optimal Control Theory}
@@ -80,12 +117,13 @@ In this way optimization methods from control theory can be applied. In particul
 	& \underset{W}{\text{minimize}}
 	& & \sum\limits_{j=0}^{N}||W_Lz_L^j - y^j||^2 \\
 	& \text{subject to}
-	& & z_{k+1}^j = \max(W_kz_k^j,0), &k = 0,\ldots,L-1,j = 1,\ldots,N
+	& & z_{k+1}^j = \max(W_kz_k^j + b^j,0), &k = 0,\ldots,L-1,j = 1,\ldots,N
 	\end{aligned}
 	\label{ocp-eq}
 \end{equation}
 
 
+\section{Simultaneous Approach}
 There are two main direct approaches to solving an OCP. First is the sequential approach, where the states are eliminated using the dynamics. This is equivalent to the backpropagation algorithm which is the current standard method. [ref mizutani]
 
 The other approach is the simultaneous approach, where the state variables and the dynamics are kept as constraints. In control theory this approach often works better for highly nonlinear problems, which is certainly the case for training neural networks. The simultaneous approach is novel to neural networks and will be the topic of this thesis.
@@ -93,6 +131,14 @@ The other approach is the simultaneous approach, where the state variables and t
 The disadvantage of this method is the number of variables that need to be optimized is much larger. For a fully connected neural network of width $W$, each layer will contain $W^2$ weights. Combined with a depth $D$, that gives approximately $W^2D$ weight variables to be optimized for both the backpropagation and simultaneous approach. Adding the states as variables however adds another $WDN$ variables, where $N$ is the number of samples in a training batch. The advantage of this method is that relaxing the states makes the problem more smooth, and will hopefully allow the optimization to converge more often to a good solution and not land in a bad local minimum.
 
 \section{Goal of the Thesis}
+
+\begin{itemize}
+\item implement simultaneous approach
+
+\item compare speed
+
+\item compare reliability/convergence
+\end{itemize}
 
 
 
