@@ -67,7 +67,8 @@ tau  = lambda x: x
 tau_ = lambda x: np.ones(x.shape)
 
 x = np.linspace(0,1,N).reshape((1,N))
-y = -np.sin(.8*np.pi*x)
+noise = np.random.normal(0,.1,N)
+y = -np.sin(.8*np.pi*x) + noise
 u = np.random.random_sample((W*W*(D-1) + D*W + I*W + O*W + O + D*W*N,))
 l = np.random.random_sample((D*W*N,))
 
@@ -90,7 +91,7 @@ print(np.allclose(J,J_U))
 
 mu = 10
 eta,omega = np.power(1/mu,0.1),1/mu
-eta_ = 1e-6
+eta_ = 1e-3
 for k in range(10):
     fun = lambda u: nn.eval_L(u,mu,l)
     jac = lambda u: nn.eval_J_L(u,mu,l)

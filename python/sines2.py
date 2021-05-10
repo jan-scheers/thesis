@@ -4,6 +4,8 @@ import scipy.linalg as la
 import scipy.optimize as op
 from algopy import UTPM
 import matplotlib.pyplot as pyplot
+import tensorflow as tf
+from tensorflow import keras
 
 
 def solve_ls(u,fun,jac,tol):
@@ -67,11 +69,28 @@ tau  = lambda x: x
 tau_ = lambda x: np.ones(x.shape)
 
 x = np.linspace(0,1,N).reshape((1,N))
-y = -np.sin(.8*np.pi*x)
+y = -np.sin(.8*np.pi*x) + np.random.normal(0,.1,N)
 u = np.random.random_sample((W*W*(D-1) + D*W + I*W + O*W + O + D*W*N,))
 l = np.random.random_sample((D*W*N,))
 
 nn = net.Net(shape,sigma,sigma_,tau,tau_,x,y)
+model = keras.Sequential()
+model.add(keras.layers.Dense(8,activation="relu"))
+model.add(keras.layers.Dense(8,activation="relu"))
+model.add(keras.layers.Dense(1))
+model(x[0,0].reshape((1,1)))
+
+w0,w,wd,b,bd,_ = nn.extract(u)
+model.layers[0].set_weights([w0.transpose(),b[0].squeeze()])
+model.layers[1].set_weights([w[0].transpose(),b[1].squeeze()])
+model.layers[2].set_weights([wd.transpose(),bd.reshape((1,))])
+
+model.compile(loss='mean_squared_error',optimizer='sgd')
+model.fit(x.reshape(N,1),y.reshape(N,1),batch_size=N,epochs=2000)
+
+pyplot.plot(x[0,:].ravel(),model(x.reshape(N,1)).numpy().ravel(),'k+',x[0,:].ravel(),y[0,:].ravel(),'r-')
+pyplot.show()
+
 
 _,z = nn.sim(u)
 n_u = u.size
@@ -90,7 +109,7 @@ print(np.allclose(J,J_U))
 
 mu = 10
 eta,omega = np.power(1/mu,0.1),1/mu
-eta_ = 1e-9
+eta_ = 1e-3
 for k in range(10):
     fun = lambda u: nn.eval_L(u,mu,l)
     jac = lambda u: nn.eval_J_L(u,mu,l)

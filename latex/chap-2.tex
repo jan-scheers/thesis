@@ -1,19 +1,20 @@
-\chapter{Python implementation}
+\chapter{Augmented Lagrangian Method}
 \label{cha:2}
-In this chapter the simultaneous approach is examined more closely and implemented into python. Instead of using \texttt{fmincon} which is a very general black box method, a more specific algorithm should both run faster and converge more often. For this the Augmented Lagrangian Method was chosen.
+In this chapter the simultaneous approach is examined more closely and implemented into python. Instead of using \texttt{fmincon} which is a very general black box method, a more specific algorithm should both run faster and converge more often. For this problem the Augmented Lagrangian Method has been chosen.
 
 \section{Augmented Lagrangian Method}
-Instead of using fmincon, now an Augmented Lagrangian Method (ALM) is used to solve the optimal control problem. The Optimal Control Problem described in equation \ref{ocp-eq}, which is printed here again:
+Instead of using fmincon, now an Augmented Lagrangian Method (ALM) is used to solve the Optimal Control Problem (OCP). The OCP is described in equation \ref{ocp-eq} and is printed here again:
 \begin{equation*}
 	\begin{aligned}
 	& \underset{W}{\text{minimize}}
 	& & \frac{1}{2}\sum\limits_{j=0}^{N}||W_Hz_H^j - y^j||^2 \\
-	& \text{subject to}
-	& & 0  = z_{k+1}^j - \sigma(W_kx_k^j + b_k), &k = 0,\ldots,H-1,j = 1,\ldots,N
+	& \text{subject to} \\
+	& & 0 &= x_0 - \sigma(W_0x_0^j + b_0) &j = 1,\ldots,N \\
+	& & 0 &= z_{k+1}^j - \sigma(W_kx_k^j + b_k), &k = 0,\ldots,H-1,j = 1,\ldots,N
 	\end{aligned}
 \end{equation*}
 
-is represented as a nonlinear least squares problem
+This is a nonlinear least squares problem:
 
 \begin{equation*}
 	\begin{aligned}
@@ -24,7 +25,43 @@ is represented as a nonlinear least squares problem
 	\end{aligned}
 \end{equation*}
 
-The ALM method solves this problem by adding both a penalty and a lagrangian term. After rewriting, the nonlinear least squares problem looks like this
+The ALM is designed to solve this sort of problem. It constructs an unconstrained problem by adding the constraints in both a penalty and a lagrangian term. The lagrangian cost function looks like this:
+
+\begin{equation}
+\mathcal{L}_c(x,\lambda) = \frac{1}{2} ||F(x)||^2_2 + <\lambda,h(x)> + \frac{c}{2} || h(x) ||^2_2
+\end{equation}
+
+where c is a penalty term, and $\lambda$ are the lagrangian parameters. The algorithm consists of an inner and outer loop. In the inner loop of the algorithm $\mathcal{L}_c{x,\lambda}$ is minimized for $x^k$ up to a certain tolerance.
+
+\begin{equation}
+	\begin{aligned}
+	 & \underset{x}{\text{min}} & \mathcal{L}_c(x,\lambda) 
+	     &= \frac{1}{2} ||F(x)||^2_2 + <\lambda,h(x)> + \frac{c}{2} || h(x) ||^2_2 \\
+	 & & &= \frac{1}{2} ||F(x)||^2_2 + \frac{c}{2} ||h(x) + \lambda/c ||^2_2 - \frac{1}{2c} ||\lambda||^2_2 \\
+	 & & &= \frac{c}{2} \Big|\Big|
+		\begin{bmatrix}
+			F(x)/\sqrt{c} \\
+			h(x) + \lambda/c
+		\end{bmatrix} \Big|\Big|^2_2 \\
+	 & & &= \frac{c}{2} ||G_c(x,\lambda)||^2_2
+	\end{aligned}
+	\label{loss}
+\end{equation}
+
+Where $G_c$ is defined as the function within the square norm. This is a nonlinear least squares problem which is solved by the \texttt{least\_squares} procedure implemented in the python package \texttt{scipy.optimize}. The function insid until the norm of the gradient of $G_c$ meets a certain tolerance $\epsilon$:
+
+\begin{equation}
+|| \nabla_kG_{c_k}(x^k,\lambda^k)||_2 \leq \epsilon
+\end{equation}
+ 
+where k is the current iterate and $\lambda^k$ are the current lagrangian parameters. The Jacobian matrix $J = \nabla_kG_{c_k}^T$ is calculated analytically and analysed further in the next section. The Langrangian parameters $\lambda^k$ are then updated in each iteration using this rule:
+
+\begin{equation}
+\lambda^{k+1} = \lambda^k + c_kh(x^k)
+\end{equation}
+
+A new penalty parameter $c^{k+1}$ are updated using the rule described in \cite{}, which depends on the norm of the gradient. If the constraints are sufficiently respected, the penalty parameter is not updated, otherwise the penalty parameter is increased by a factor 100. The algorithm continues in this manner until the norm of the Jacobian matrix reaches a tolerance $\zeta$.
+
 
 \begin{equation}
 	\begin{aligned}
@@ -39,18 +76,6 @@ The ALM method solves this problem by adding both a penalty and a lagrangian ter
 	\end{aligned}
 	\label{loss}
 \end{equation}
-
-In the inner loop of the algorithm the least squares problem is solved for $x^k$ up to a certain tolerance.
-
-\begin{equation}
-x^k \text{ s. t. } ||\nabla_k\mathcal{L}_{c_k}(x^k,\lambda^k)||_2 \leq \epsilon
-\end{equation}
-
-The Langrangian parameters $lambda$ are then updated using the rule:
-\begin{equation}
-\lambda^{k+1} = \lambda^k + c_kh(x^k)
-\end{equation}
-A new penalty parameter $c^{k+1}$ is chosen and the algorithm continues. REFER nocedal wright,
 
 \begin{figure}
      \centering
