@@ -106,7 +106,7 @@ class Net:
         h = self.eval_h(u)
         h = h+l/mu
 
-        return np.concatenate([F,h])
+        return np.concatenate([h,F])
 
     
     def eval_J_L(self,u,mu,l):
@@ -118,15 +118,16 @@ class Net:
         J = np.zeros((D*W*N+O*N,n_u))
 
         # Init horizontal slices of matrix
-        p,n = 0,O*N
-        F = slice(p,n)
-        p = n
 
         h = []
+        p,n = 0,0
         for i in range(D):
             n = p + W*N
             h.append(slice(p,n))
             p = n
+
+        n = p + O*N
+        F = slice(p,n)
 
         # W0
         w0_ = self.sigma_(w0.dot(self.x)+b[0])
@@ -144,6 +145,8 @@ class Net:
             w_ = -z[i]*w_[:,np.newaxis,:]
             w_ = w_*np.eye(W)[:,:,np.newaxis,np.newaxis]
             w_ = np.swapaxes(w_,1,2).reshape(W*W,W*N).transpose()
+
+            print(w_)
 
             n = p+W*W
             J[h[i+1],p:n] = w_
@@ -226,5 +229,5 @@ def eval_L_U(u,mu,l,net):
         h = UTPM(np.concatenate([h.data,hi.data],3))
 
     h = h+l/mu
-    return UTPM(np.concatenate([F.data,h.data],3))
+    return UTPM(np.concatenate([h.data,F.data],3))
 
