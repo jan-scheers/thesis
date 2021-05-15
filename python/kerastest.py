@@ -3,7 +3,7 @@ from algopy import UTPM
 import tensorflow as tf
 import numpy as np
 from tensorflow import keras
-import net2
+import alm
 from matplotlib import pyplot
 
 I,O,W,D,N, = 2,1,3,2,21
@@ -37,10 +37,10 @@ J_U = J_U.reshape(J_U.shape[1:3])
 
 
 model = keras.Sequential()
-model.add(net2.Dense_d(activation_=sigma_,units=W,activation=tf.math.tanh,input_shape=(I,)))
-model.add(net2.Dense_d(activation_=sigma_,units=W,activation=tf.math.tanh))
-model.add(net2.Dense_d(activation_=tau_,units=O,activation=tau))
-n2 = net2.ALMModel(model, x.transpose(), y.transpose())
+model.add(alm.Dense_d(activation_=sigma_,units=W,activation=tf.math.tanh,input_shape=(I,)))
+model.add(alm.Dense_d(activation_=sigma_,units=W,activation=tf.math.tanh))
+model.add(alm.Dense_d(activation_=tau_,units=O,activation=tau))
+n2 = alm.ALMModel(model, x.transpose(), y.transpose())
 model.summary()
 
 g = np.arange(W)+1
@@ -62,7 +62,7 @@ t[mask] = k[0:h[0]-D*W-O]
 t[g] = k[h[0]-D*W-O:h[0]]
 t[h] = k[h]
 
-
+L2 = n2.L(u[t], mu, l)
 J2 = n2.JL(u[t], mu).toarray()
 
 Jnz = J2 != 0
@@ -70,6 +70,7 @@ Jnz = J2 != 0
 J2 = np.c_[J2[:,mask],J2[:,g],J2[:,h]]
 
 print(np.allclose(L,np.ravel(L_U.data[0,0])))
+print(np.allclose(L,L2))
 print(np.allclose(J,J_U))
 print(np.allclose(J,J2))
 

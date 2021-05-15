@@ -1,312 +1,155 @@
 import numpy as np
-import scipy.linalg as la
+import tensorflow as tf
+from tensorflow import keras
+from scipy import sparse
 import scipy.optimize as op
-from algopy import UTPM
-import matplotlib.pyplot as pyplot
+import scipy.linalg as la
 
+class Dense_d(keras.layers.Dense):
+    def __init__(self,activation_,**kwargs):
+        super().__init__(**kwargs)
+        self.activation_ = activation_
 
-class Net:
-
-    def __init__(self,shape, sigma, sigma_, x, y):
-        self.sigma  = sigma
-        self.sigma_ = sigma_
-        self.shape = shape
+class ALMModel:
+    def __init__(self,model,x,y):
+        self.model = model
+        t = self.model(x)
         self.x = x
         self.y = y
-        self.W  = shape[0]
-        self.D  = shape[1]
-        self.N  = x.size
+        self.batch_size = x.shape[0]
+        self.nz = sum([self.batch_size*model.layers[i].units for i in range(len(model.layers)-1)])
 
-    
-    def extract(self,u):
-        """ Extracts variables from variable vector """
-        W,D,N = self.W,self.D,self.N
-        
-        # Input weights
-        p,n = 0,W
-        w1 = u[p:n].reshape((W,1))
-        p = n
-
-        # Hidden weights
+    def read(self,u):
+        layers = self.model.layers
         w = []
-        for i in range(D-1):
-            n = p + W*W
-            w.append(u[p:n].reshape((W,W)))
-            p = n
+        p = 0
+        for i in range(0,len(layers)):
+            s = layers[i].weights[0].shape
+            m,n = s[1],s[0]+1
+            w.append(u[p:p+m*n].reshape(m,n))
+            p = p+m*n
 
-        # Output weights
-        n = p + W
-        wn =  u[p:n].reshape((1,W))
-        p = n
-        
-        # Hidden biases
-        b = []
-        for i in range(D):
-            n = p + W
-            b.append(u[p:n].reshape((W,1)))
-            p = n
+        z = [self.x.transpose()]
+        for i in range(1,len(layers)):
+            m,n = w[i].shape[1]-1,self.batch_size
+            zi = u[p:p+m*n].reshape(m,n)
+            z.append(zi)
+            p = p+m*n
+        y = np.r_[self.y.transpose()]
+        z.append(y)
 
-        # Output bias
-        n = p + 1
-        bn = u[p:n].reshape((1,1))
-        p = n
-        
-        # State vectors
-        z = []
-        for i in range(D):
-            n = p + W*N
-            z.append(u[p:n].reshape((W,N)))
-            p = n
-
-        return w1,w,wn,b,bn,z
-
-    def sim(self,u):
-        w1,w,wn,b,bn,_ = self.extract(u)
-        z = np.zeros((self.D,self.W,self.N))
-
-        z[0] = self.sigma(w1.dot(self.x) + b[0])
-        
-        for i in range(self.D-1):
-            z[i+1] = self.sigma(w[i].dot(z[i]) + b[i+1])
-            y = wn.dot(z[self.D-1])+bn
-        
-        return y,z
+        return w,z
     
-    def eval_h(self,u):
-        W,D,N = self.W,self.D,self.N
-        w1,w,wn,b,bn,z = self.extract(u)
-        h = np.zeros((D-1,)+z[0].shape)
-        
-        h1 = z[0]   - self.sigma(w1.dot(self.x)+b[0])
-        
-        for i in range(D-1):
-            h[i] = z[i+1] - self.sigma(w[i].dot(z[i]) + b[i+1])
+    def write(self):
+        u = np.empty(0)
+        for layer in self.model.layers:
+            w,b = layer.weights
+            m,n = w.shape[1],w.shape[0]+1
+            w = np.c_[w.numpy().transpose(),b.numpy().reshape(m,1)]
+            u = np.append(u,w)
+        z = [self.x]
+        for i,layer in enumerate(self.model.layers):
+            z.append(layer(z[i]))
 
-        return np.concatenate([h1.ravel(),h.ravel()])
+        z = z[1:-1]
+        z = [zi.numpy().transpose() for zi in z] 
+        u = np.append(u,np.concatenate(z))
+        return u
 
-    def eval_L(self,u,mu,l):
-        W,D,N = self.W,self.D,self.N
-        w1,w,wn,b,bn,z = self.extract(u)
-        
-        F  = self.y - (wn.dot(z[D-1])+bn)
-        F = F.ravel()/np.sqrt(mu)
+    def set_weights(self,w):
+        for i,layer in enumerate(self.model.layers):
+            wi = w[i].transpose()
+            layer.set_weights([wi[:-1,:],wi[-1:,].reshape((-1,))])
 
-        h = self.eval_h(u)
-        h = h+l/mu
-
-        return np.concatenate([F,h])
-
-    
-    def eval_J_L(self,u,mu,l):
-        W,D,N,n_u = self.W,self.D,self.N,u.size
-        w1,w,wn,b,bn,z = self.extract(u)
-        J = np.zeros((D*W*N+N,n_u))
-        p,n = 0,N
-        F = slice(p,N)
-        p = n
-
+    def h(self,u):
+        w,z = self.read(u)
         h = []
-        for i in range(D):
-            n = p + W*N
-            h.append(slice(p,n))
-            p = n
+        for i,layer in enumerate(self.model.layers[:-1]):
+            zi_e = np.r_[z[i],np.ones((1,self.batch_size))]
+            hi = z[i+1] - np.array(layer.activation(w[i].dot(zi_e)))
+            h.append(hi.reshape(-1))
+        return np.concatenate(h)
 
-        w1_ = -self.x*self.sigma_(w1.dot(self.x)+b[0])
-        w1_ = np.eye(W)[:,np.newaxis,:]*w1_.transpose()
-        w1_ = w1_.reshape(W*N,W)
-
-        p,n = 0,W
-        J[h[0],p:n] = w1_
-        p = n
-
-        for i in range(D-1):
-            w_ = self.sigma_(w[i].dot(z[i])+b[i+1])
-            w_ = -z[i]*w_[:,np.newaxis,:]
-            w_ = w_*np.eye(W)[:,:,np.newaxis,np.newaxis]
-            w_ = np.swapaxes(w_,1,2).reshape(W*W,W*N).transpose()
-
-            n = p+W*W
-            J[h[i+1],p:n] = w_
-            p = n
-
-        wn_ = -z[D-1].transpose()/np.sqrt(mu)
-
-        n = p+W
-        J[F,p:n] = wn_
-        p = n
-
-        b1_ = -self.sigma_(w1.dot(x)+b[0])
-        b1_ = np.eye(W)[:,np.newaxis,:]*b1_.transpose()
-        b1_ = b1_.reshape(W*N,W)
-                          
-        n = p+W
-        J[h[0],p:n] = b1_
-        p = n
-
-
-
-        for i in range(D-1):
-            b_ = -self.sigma_(w[i].dot(z[i])+b[i+1])
-            b_ = np.eye(W)[:,np.newaxis,:]*b_.transpose()
-            b_ = b_.reshape(W*N,W)
-
-            n = p+W
-            J[h[i+1],p:n] = b_
-            p = n
-
-        bn_ = -np.ones((N,1))/np.sqrt(mu)
-
-        n = p+1
-        J[F,p:n] = bn_
-        p = n
-
-        for i in range(D-1):
-            z_ = -w[i].transpose()[:,:,np.newaxis]*self.sigma_(w[i].dot(z[i])+b[i+1])
-            z_ = np.eye(N)*z_[:,:,:,np.newaxis]
-            z_ = np.swapaxes(z_,1,2).reshape(W*N,W*N).transpose()
-
-            n = p+W*N
-            J[h[i],p:n] = np.eye(W*N)
-            J[h[i+1],p:n] = z_
-            p = n
-
-        zn_ = -np.eye(N)*wn[:,:,np.newaxis,np.newaxis]/np.sqrt(mu)
-        zn_ = np.swapaxes(zn_,1,2).reshape(N,W*N)
-
-        n = p+W*N
-        J[h[D-1],p:n] = np.eye(W*N)
-        J[F,p:n] = zn_
-
-        return J
-    
-  
-def eval_L_U(u,mu,l,net):
-    W,D,N = net.W,net.D,net.N
-    w1,w,wn,b,bn,z = net.extract(u)
-
-    F      = net.y  -          (UTPM.dot(wn,z[D-1]) + bn)
-    h      = z[0]   - UTPM.tanh(UTPM.dot(w1,net.x)  + b[0])
-    F,h = F.reshape((1,-1))/np.sqrt(mu),h.reshape((1,-1))
-    for i in range(D-1):
-        hi = z[i+1] - UTPM.tanh(UTPM.dot(w[i],z[i]) + b[i+1])
-        hi = hi.reshape((1,-1))
-        h = UTPM(np.concatenate([h.data,hi.data],3))
-
-    h = h+l/mu
-    return UTPM(np.concatenate([F.data,h.data],3))
-
-def solve_ls(u,fun,jac,tol):
-    J = jac(u)
-    m,n = np.shape(J)
-    lm,nu = 0.01,2
-    while(True):
-        lm = lm/nu
-        J = jac(u)
-        r = fun(u)
-        print(la.norm(J))
-        if(la.norm(J)<tol):
-            break
-
-        b = la.solve(np.dot(J.transpose(),J)+lm*np.eye(n),np.dot(J.transpose(),r))
-
-        while(la.norm(fun(u-b))>la.norm(fun(u))):
-            lm = lm*nu
-            b = la.solve(np.dot(J.transpose(),J)+lm*np.eye(n),np.dot(J.transpose(),r))
-            print(la.norm(r))
-        print()
-        u = u-b
-
-
-#        lm = lm/nu
-#        J = jac(u)
-#        r = fun(u)
-#        print(la.norm(J),la.norm(r),np.linalg.norm(J.transpose()))
-#        if(la.norm(J)<tol):
-#            break
-#
-#        Jl = np.concatenate((J,lm*np.eye(n)))
-#        Q,R = la.qr(Jl,mode='economic')
-#        rl = np.dot(Q.transpose(),np.concatenate((r,np.zeros((n,)))))
-#        b = la.solve_triangular(R,rl)
-#        u0 = u-b
-#
-#        while(la.norm(fun(u0))>la.norm(fun(u))):
-#            lm = lm*nu
-#            Jl = np.concatenate((J,lm*np.eye(n)))
-#            Q,R = la.qr(Jl,mode='economic')
-#            rl = np.dot(Q.transpose(),np.concatenate((r,np.zeros((n,)))))
-#            b = la.solve_triangular(R,rl)
-#            u0 = u-b
-#        u = u0
-#        print()
-
-    return u
-
-
-
-
-W,D,N, = 3,2,7
-mu = 10
-shape = (W,D)
-sigma = lambda x: np.tanh(x)
-sigma_ = lambda x: 2/(np.cosh(2*x)+1)
-
-x = np.reshape(np.linspace(0,1,N),[1,N])
-y = -np.sin(.8*np.pi*x)
-u = np.random.random_sample((W+(D-1)*W*W+W+D*W+1+D*W*N,))
-l = np.random.random_sample((D*W*N,))
-
-net = Net(shape,sigma,sigma_,x,y)
-
-_,z = net.sim(u)
-n_u = u.size
-u[n_u-W*D*N:n_u] = z.ravel()
-
-L = net.eval_L(u,mu,l)
-J = net.eval_J_L(u,mu,l)
-
-u_U = UTPM.init_jacobian(u)
-L_U = eval_L_U(u_U,mu,l,net)
-J_U = UTPM.extract_jacobian(L_U)
-J_U = J_U.reshape(J_U.shape[1:3])
-
-print(np.allclose(L,np.ravel(L_U.data[0,0])))
-print(np.allclose(J,J_U))
-
-print(J.shape)
-Jm,Jn = J.shape
-for i in range(Jm):
-    for j in range(Jn):
-        if J[i,j]:
-            print('#',end='')
-        else:
-            print(' ',end='')
-    print()
-
-mu = 10
-eta,omega = np.power(1/mu,0.1),1/mu
-eta_ = 1e-4
-for k in range(10):
-    fun = lambda u: net.eval_L(u,mu,l)
-    jac = lambda u: net.eval_J_L(u,mu,l)
-    print(jac(u).shape)
-    sol = op.least_squares(fun,u,jac,ftol=None,xtol=None,gtol=1/mu)
-    u = sol.x
-    #u = solve_ls(u,fun,jac,1/mu)
-
-    h = net.eval_h(u)
-    print(la.norm(h))
-    if la.norm(h) <= eta:
-        if la.norm(h) <= eta_:
-            break
-        l = l - mu*h
-        eta,omega = 1/mu,1/mu/mu
-    else:
-        mu = 100*mu
-        eta,omega = np.power(1/mu,0.1),1/mu
+    def L(self,u,mu,l):
+        w,z = self.read(u)
         
-y,_ = net.sim(u)
+        out_layer = self.model.layers[-1]
+        z_e = np.r_[z[-2],np.ones((1,self.batch_size))]
+        F = z[-1] - np.array(out_layer.activation(w[-1].dot(z_e)))
+        F = F.reshape(-1)/np.sqrt(mu)
 
-pyplot.plot(x.ravel(),net.y.ravel(),'k+',x.ravel(),y.ravel(),'r-')
-pyplot.show()
+        h = self.h(u)+l/mu
+        return np.concatenate([h,F])
+
+        
+    def JL(self,u,mu):
+        layers = self.model.layers
+        w,z = self.read(u)
+
+        w_ = []
+        z_ = []
+        np.set_printoptions(linewidth=200)
+        for i in range(len(layers)):
+            # Add bias to weights
+            zi_e = np.r_[z[i],np.ones((1,self.batch_size))]
+
+            ai = layers[i].activation_(w[i].dot(zi_e))
+
+            wi_ = -zi_e*ai[:,np.newaxis,:]
+            wi_ = wi_*np.eye(w[i].shape[0])[:,:,np.newaxis,np.newaxis]
+            wi_ = np.swapaxes(wi_,1,2).reshape(w[i].size,w[i].shape[0]*self.batch_size).transpose()
+
+            w_.append(wi_)
+
+            if i > 0:
+                zi_ = -w[i][:,:-1].transpose()[:,:,np.newaxis]*ai
+                zi_ = np.eye(self.batch_size)*zi_[:,:,:,np.newaxis]
+                zi_ = np.swapaxes(zi_,1,2).reshape(z[i].size,z[i+1].size).transpose()
+                z_.append(zi_)
+
+        
+        w_[-1] = w_[-1]/np.sqrt(mu)
+        z_[-1] = z_[-1]/np.sqrt(mu)
+
+        w_ = [sparse.csc_matrix(wi_) for wi_ in w_]
+        z_ = [sparse.csc_matrix(zi_) for zi_ in z_]
+        
+        z_ = sparse.block_diag(z_)
+        z_ = sparse.vstack((sparse.csr_matrix((w_[0].shape[0],z_.shape[1])),z_))
+        z_ = z_+sparse.eye(z_.shape[0],z_.shape[1])
+        w_ = sparse.block_diag(w_)
+        J = sparse.hstack((w_,z_))
+        return J
+            
+
+    def training_loop_alm(self,mu_0=10,tau=1e-4):
+        l = np.random.normal(0,1,self.nz)
+        u = self.write()
+        sigma_0,h_0 = 1,la.norm(self.h(u))
+        for k in range(10):
+            mu_k = np.power(mu_0,k)
+            eta_k = 1/mu_k
+            fun = lambda u: self.L(u,mu_k,l)
+            jac = lambda u: self.JL(u,mu_k)
+            sol = op.least_squares(fun,u,jac,ftol=None,xtol=None,gtol=eta_k)
+            u = sol.x
+
+            w,_ = self.read(u)
+            self.set_weights(w)
+            h = self.h(u)
+            h2 = la.norm(h)
+
+            sigma = sigma_0*np.amin([h_0*np.power(np.log(2),2)/h2/(k+1)/np.power(np.log(k+2),2),1])
+            l = l + sigma*h
+
+            jac = self.JL(u,mu_k).toarray()
+            tol = la.norm(2*self.JL(u,mu_k).transpose()*self.L(u,mu_k,l))+h2
+            print("epoch: ",k," tolerance: ",tol)
+            if (tol < tau):
+                break
+        return u
+            
+            
+
+
 
