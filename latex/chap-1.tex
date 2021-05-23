@@ -1,11 +1,12 @@
-
 \chapter{Initial exploration}
 \label{cha:1}
 In this chapter an initial exploration of the problem is done. The backpropagation algorithm is compared relative to the simultaneous approach for a couple small regression problems.
 
-For the backpropagation algorithm the experiments were done using the Neural Network Toolbox in MATLAB version 2018a. The training was done using the \texttt{trainlm} procedure which implements a Levenberg-Marquardt backpropagation algorithm.
+For the backpropagation algorithm the experiments were done using the Neural Network Toolbox in MATLAB version 2018a. The training was done using the \texttt{trainlm} procedure which implements a Levenberg-Marquardt backpropagation algorithm. GRADIENT DESCENT
 
 For the simultaneous approach the problems were set up using the YALMIP version R20190425 optimization library, implementing the OCP detailed in equation \ref{ocp-eq}. This problem was then solved using MATLAB's \texttt{fmincon} procedure.
+
+
 
 \section{First experiment}
 The first experiment conducted was to apply both algorithms to a test problem. A small neural network is constructed with 2 hidden layers with each layer containing 3 nodes with tansig activation function. The activation function was chosen because it works well for a small network. This network is then trained to approximate a piece of a sine function. Both algorithms are trained for 100 epochs. Figure \ref{} shows the training performance for a training run of each algorithm. Both perform well, but the simultaneous approach is much slower. This can be due to the fact that the new algorithm is not well optimized.

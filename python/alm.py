@@ -70,19 +70,19 @@ class ALMModel:
             h.append(hi.reshape(-1))
         return np.concatenate(h)
 
-    def L(self,u,mu,l):
+    def L(self,u,beta,l):
         w,z = self.read(u)
         
         out_layer = self.model.layers[-1]
         z_e = np.r_[z[-2],np.ones((1,self.batch_size))]
         F = z[-1] - np.array(out_layer.activation(w[-1].dot(z_e)))
-        F = F.reshape(-1)/np.sqrt(mu)
+        F = F.reshape(-1)/np.sqrt(beta)
 
-        h = self.h(u)+l/mu
+        h = self.h(u)+l/beta
         return np.concatenate([h,F])
 
         
-    def JL(self,u,mu):
+    def JL(self,u,beta):
         layers = self.model.layers
         w,z = self.read(u)
 
@@ -108,8 +108,8 @@ class ALMModel:
                 z_.append(zi_)
 
         
-        w_[-1] = w_[-1]/np.sqrt(mu)
-        z_[-1] = z_[-1]/np.sqrt(mu)
+        w_[-1] = w_[-1]/np.sqrt(beta)
+        z_[-1] = z_[-1]/np.sqrt(beta)
 
         w_ = [sparse.csc_matrix(wi_) for wi_ in w_]
         z_ = [sparse.csc_matrix(zi_) for zi_ in z_]
@@ -122,32 +122,52 @@ class ALMModel:
         return J
             
 
-    def training_loop_alm(self,mu_0=10,tau=1e-4):
+    def fit_alm(self,val_data=None,beta=10,tau=1e-2):
         l = np.random.normal(0,1,self.nz)
         u = self.write()
         sigma_0,h_0 = 1,la.norm(self.h(u))
+        hist = {"tol":np.empty(0),"njev":np.empty(0),"loss":np.empty(0),'val_loss':np.empty(0)}
         for k in range(10):
-            mu_k = np.power(mu_0,k)
-            eta_k = 1/mu_k
-            fun = lambda u: self.L(u,mu_k,l)
-            jac = lambda u: self.JL(u,mu_k)
-            sol = op.least_squares(fun,u,jac,ftol=None,xtol=None,gtol=eta_k)
+            beta_k = np.power(beta,k)
+            eta_k = 1/beta_k
+            fun = lambda u: self.L(u,beta_k,l)
+            jac = lambda u: self.JL(u,beta_k)
+            try:
+                sol = op.least_squares(fun,u,jac,ftol=None,xtol=None,gtol=eta_k,tr_solver='lsmr')
+            except:
+                print("Divide by 0")
+                break
             u = sol.x
 
             w,_ = self.read(u)
             self.set_weights(w)
-            h = self.h(u)
-            h2 = la.norm(h)
 
-            sigma = sigma_0*np.amin([h_0*np.power(np.log(2),2)/h2/(k+1)/np.power(np.log(k+2),2),1])
+            h = self.h(u)
+
+            sigma = sigma_0*np.amin([h_0*np.power(np.log(2),2)/la.norm(h)/(k+1)/np.power(np.log(k+2),2),1])
             l = l + sigma*h
 
-            jac = self.JL(u,mu_k).toarray()
-            tol = la.norm(2*self.JL(u,mu_k).transpose()*self.L(u,mu_k,l))+h2
-            print("epoch: ",k," tolerance: ",tol)
-            if (tol < tau):
+            # Convergence of Lagrangian function
+            jac = self.JL(u,beta_k).toarray()
+            tol = la.norm(2*self.JL(u,beta_k).transpose()*self.L(u,beta_k,l))+la.norm(h)
+            hist['tol'] = np.append(hist['tol'],tol)
+            hist['njev'] = np.append(hist['njev'],sol.njev)
+
+            # Convergence of training loss
+            y_pred = self.model(self.x)
+            mse = keras.losses.MeanSquaredError()
+            loss = mse(self.y,y_pred).numpy()
+            hist['loss'] = np.append(hist['loss'],loss)
+            if(val_data):
+                # Convergence of val/test loss
+                y_val_pred = self.model(val_data[0])
+                val_loss = mse(y_val_pred,val_data[1]).numpy()
+                print("epoch: ",k+1,"DL: ",tol,"njev: ",sol.njev, "loss = ",loss,"val_loss = ",val_loss)
+                hist['val_loss'] = np.append(hist['val_loss'],val_loss)
+
+            if k>1 and ((1+tau)*hist['loss'][-1] > hist['loss'][-2]):
                 break
-        return u
+        return hist
             
             
 

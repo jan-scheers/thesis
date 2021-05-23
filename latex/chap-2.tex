@@ -1,8 +1,11 @@
 \chapter{Augmented Lagrangian Method}
 \label{cha:2}
-In this chapter the simultaneous approach is examined more closely and implemented into python. Instead of using \texttt{fmincon} which is a very general black box method, a more specific algorithm should both run faster and converge more often. For this problem the Augmented Lagrangian Method has been chosen.
+In this chapter the direct multiple shooting approach is examined more closely and a more specific algorithm is designed to replace \texttt{fmincon}, which is a very general method. For this problem the Augmented Lagrangian Method has been chosen. It will be implemented in python using \texttt{numpy},\texttt{scipy}, and \texttt{keras}
 
 \section{Augmented Lagrangian Method}
+TODO: cite textbook, 1906
+
+
 Instead of using fmincon, now an Augmented Lagrangian Method (ALM) is used to solve the Optimal Control Problem (OCP). The OCP is described in equation \ref{ocp-eq} and is printed here again:
 \begin{equation*}
 	\begin{aligned}

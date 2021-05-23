@@ -1,7 +1,16 @@
 \chapter{Conclusion}
 \label{cha:conclusion}
-The final chapter contains the overall conclusion. It also contains
-suggestions for future work and industrial applications.
+The main goal of this thesis was to present a novel algorithm for training deep neural networks, using methods commonly used in Optimal Control Theory. The optimization problem of neural network training was reformulated into an Optimal Control Problem. In a first step the direct multiple shooting method was applied to the OCP, which is commonly used in control theory for very nonlinear problems. 
+
+This method was implemented in MATLAB using a very general optimization function \texttt{fmincon}, proving that the problem was feasible. Then an Augmented Lagrangian Method was presented to solve the OCP. First a textbook ALM method was implemented, later this was improved by using an inexact ALM detailed in \cite{}. The Jacobian matrix at the center of the ALM was verified to be correct using automatic differentiation tools. This ALM method was then written into code using python with \texttt{numpy},\texttt{scipy}, and \texttt{keras}
+
+Finally the novel algorithm was tested against industry standard backpropagation methods, ADAM and SGD. It compares favorably for some smaller, harder training problems. (SPECIFY) However it scales poorly for larger datasets. As the title indicates, the original goal of this new algorithm was to better avoid "bad" local minima in training. But the new algorithm does not show much improvement compared to standard methods, and practice has shown that is not a common problem. In larger neural networks, experts suspect local minima usually have comparable performance to the global minimum \cite{Goodfellow-et-al-2016}.  
+
+
+TODO: Batch approach. It also cannot yet handle loss functions besides MSE, which could be the topic of further research.
+
+
+
 
 %%% Local Variables: 
 %%% mode: latex
