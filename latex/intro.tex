@@ -1,25 +1,26 @@
 \chapter{Introduction}
 \section{Artificial Neural Networks}
 
-Artifical Neural Networks (ANNs) are a very popular machine learning model. They are known to be very expressive, leading to low statistical bias. With enough neurons, ANNs can approximate any function.  They are especially useful for learning from very large data sets. But it is not entirely clear what the optimization of an ANN converges to, as the loss surface is highly non-convex. Nonetheless a number of results show that for wide enough networks, there are few "bad" local minima.
+Artifical Neural Networks (ANNs) are a very popular machine learning model. They are known to be very expressive, leading to low statistical bias[REF]. With enough neurons, ANNs can approximate any function[REF].  They are especially useful for learning from very large data sets. But it is not entirely clear what the optimization of an ANN converges to, as the loss surface is highly non-convex[REF]. Nonetheless a number of results show that for wide enough networks, there are few "bad" local minima[REF].
 
 ANNs are composed of 'neurons', which are in some ways analogous to biological neurons.Each neuron is a nonlinear function transforming the weighted sum of its inputs and a bias:
 \begin{equation}
       y = \sigma(w_1x_1+w_2x_2+...+w_nx_n + b)
 \end{equation}
 
-$w_i$ are the weights, $x_i$ are the inputs to the neuron, which come either from a previous neuron, or are fed into the network, $\sigma$ is the activation function, and finally a bias $b$ is also added to the sum. This is the McCulloch-Pitts neuron model.[REF] The most commonly used activation function $\sigma$ is the Rectified Linear Unit (ReLU):
+$w_i$ are the weights, $x_i$ are the inputs to the neuron, which come either from a previous neuron, or are fed into the network, $\sigma$ is the activation function, and finally a bias $b$ is also added to the sum. This is the McCulloch-Pitts neuron model[REF]. The most commonly used activation function $\sigma$ is the Rectified Linear Unit (ReLU):
 
 \begin{equation}
       \sigma(x) = x^+ = \max(0,x)
 \end{equation}
 
-Many other activation functions are possible, such as the sigmoid function ($\frac{1}{1+e{-x}}$) or the tansig function ($\tanh(x)$).
+Many other activation functions are possible, such as the sigmoid function ($\frac{1}{1+e^{-x}}$) or the hyperbolic tangent function ($\tanh(x)$).
 
-A visual representation is shown in figure \ref{neural}b. A full network is built by connecting layers of neurons as shown in figure \ref{neural}a. An ANN can also be expressed as a combination of function composition and matrix multiplication, ignoring for a moment the bias vectors.
+A visual representation is shown in figure \ref{neural:neur}. A full network is built by connecting layers of neurons as shown in figure \ref{neural:net}. An ANN can also be expressed as a combination of function composition and matrix multiplication, ignoring for a moment the bias vectors.
 
 \begin{equation}
          f(W,x) = W_L\sigma(W_{L-1}\sigma(...W_1\sigma(W_0x)...))
+         \label{nnfnc}
 \end{equation}
 
 where $W_n$ are the matrixes of the connection weights and $L$ is the depth of the network. 
@@ -27,15 +28,22 @@ where $W_n$ are the matrixes of the connection weights and $L$ is the depth of t
 
 
 
-
-   \begin{figure}[b]
+\begin{figure}[b]
 	\centering
-	\includegraphics[width=0.49\textwidth]{network}
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{network}
+		\caption{Deep Neural Network}
+		\label{neural:net}
+	\end{subfigure}
 	%\caption{Feedforward Deep Neural Network. (Retrieved from https://towardsdatascience.com)}
-	\includegraphics[width=0.49\textwidth]{neuron}
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{neuron}
+		\caption{Single Neuron}
+		\label{neural:neur}
+	\end{subfigure}
 	\caption{Feedforward Deep Neural Network and Single Neuron - McCulloch-Pitts model. (Retrieved from https://towardsdatascience.com)}
 	\label{neural}
-	\end{figure}
+\end{figure}
 
 \newpage
 
@@ -121,6 +129,7 @@ $\theta$ & decision variables & weight parameters & $W$\\
 $a$ & state variables & (neuron) activation & $z$\\
 & stage & layer \\
 \end{tabular}
+\caption{Comparison of notation between Control theory and Machine Learning}
 \label{trans-tbl}
 \end{table}
 
@@ -172,17 +181,16 @@ In this way the gradients of the weights are computed with only a few matrix ope
 
 
 \section{Direct Multiple Shooting Method}
-It has been shown that the BP algorithm detailed in the previous setting can be derived in an optimal control context in the spirit of dynamic programming \cite{mizutani2000}. But control theory has many other solution methods for OCPs. One of the more well known one is the direct multiple shooting method (DMS) \cite{bock1984multiple}.
+It has been shown that the BP algorithm detailed in the previous setting can be derived in an optimal control context in the spirit of dynamic programming \cite{mizutani2000}. But control theory has many other solution methods for OCPs. One of the more well known one is the direct multiple shooting (DMS) method \cite{bock1984multiple}.
 
 In this method the state variables in the non-linear program (NLP), equation \ref{ocp-eq}, are not eliminated using the dynamics. Instead the dynamics are kept as constraints to the NLP. This leads to a much larger NLP, but it will be more structured. This is in contrast to the direct single shooting method, where the dynamics are eliminated, leading to a small, but highly non-linear problem. The BP algorithm is analogous to a direct single shooting method.
 
-The total number of variables that will be optimized for in a neural network is quite large. For a fully connected neural network of width $W$, depth $L$, there will be $\mathcal{O}(W^2L)$ weights to be optimized, a.k.a. decision variables in control theory. This is true for both BP and DMS. But for DMS, another $\mathcal{O}(WLN)$ state variables are added, with $N$ the number of training samples. In control theory the tradeoff for making the problem larger in this way is that the problem becomes less non-linear. In practice this often makes the NLP easier to solve, or come to better solution and that is why DMS is a common choice. For neural networks this could let the algorithm get stuck in a "bad" local minimum less often.
+The total number of variables that will be optimized for in a neural network is quite large. For a fully connected neural network of width $W$, depth $L$, there will be $\mathcal{O}(W^2L)$ weights to be optimized, a.k.a. decision variables in control theory. This is true for both BP and DMS. But for DMS, another $\mathcal{O}(WLN)$ state variables are added, with $N$ the number of training samples. In control theory the tradeoff for making the problem larger in this way is that the problem becomes less non-linear. In practice this often makes the NLP easier to solve, which is why DMS is a common choice. For neural networks this could let the algorithm get stuck in a "bad" local minimum less often.
 
 \section{Goal of the Thesis}
+The main goal of this thesis is to implement the direct shooting method for training neural networks, and compare it to the industry standard backpropagation algorithm. First an initial exploration of the method will be conducted in MATLAB. Then an Augmented Lagrangian Method (ALM) will be developed to solve the DMS problem more efficiently, which will be coded in python.
 
-The main goal of this thesis is to implement the direct shooting method for training neural networks, and compare it to the industry standard backpropagation algorithm. First an initial exploration of the method will be conducted in MATLAB, then the algorithm will be implemented in python using an Augmented Langrangian Method.
-
-The code will be compared to common gradient descent and stochastic gradient descent algorithms used in practice such as ADAM \cite{kingma2017adam}. They will be compared in terms of speed, scalability and reliability for a number of test problems.
+The code will be compared to common gradient descent used in practice such as ADAM \cite{kingma2017adam}. They will be compared in terms of speed, scalability, reliability and performance for a number of test problems.
 
 In particular the objective will be to see if this algorithm can better handle known challenges for current training algorithms, such as the "vanishing/exploding gradient problem", or convergence to "bad local minima" (Goodfellow et al. \cite{Goodfellow-et-al-2016}, Sec. 8.2).
 
