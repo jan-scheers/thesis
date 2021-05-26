@@ -2,7 +2,90 @@
 \label{cha:2}
 In this chapter the direct multiple shooting approach is examined more closely and a more specific algorithm is designed to replace \texttt{fmincon}, which is a very general method. For this problem the Augmented Lagrangian Method has been chosen. It will be implemented in python using \texttt{numpy},\texttt{scipy}, and \texttt{keras}
 
-\section{Augmented Lagrangian Method}
+\section{Classical Augmented Lagrangian Method}
+The Augmented Lagrangian Method (ALM) is a classical algorithmic framework for solving constrained NLPs. It was first discovered in 1969 \cite{Hestenes1969},\cite{Powell1969} and was known as the method of multipliers. The textbook examples of this method can be found in \cite{Birgin2009} and \cite{bertsekas2014constrained}.
+
+It is designed to minimize equality constrained optimization problems defined in the following way:
+
+\begin{equation}
+	\begin{aligned}
+	& \underset{x}{\text{min}} & f(x) & \\
+	& \text{s.t.} & h(x) &= 0 \\
+	\end{aligned}
+\end{equation}
+
+ALM solves this by minimizing a series of unconstrained problems in a similar manner as the penalty method. In each iteration a $\beta$-augmented Lagrangian $\mathcal{L}_\beta(x,\lambda)$ is minimized for x:
+
+\begin{equation}
+	\underset{x}{\text{min}} \hspace{.5em} \underset{\lambda}{\text{max}} \hspace{.5em}  \mathcal{L}_\beta(x,\lambda) = f(x) + <\lambda,h(x)> + \frac{\beta}{2} || h(x) ||^2_2
+\end{equation}
+
+where $\beta>0$ is the penalty weight. This can be viewed as a penalty method which has been shifted using the term in $\lambda$\cite{Birgin2009}. When $\beta$ or $\lambda$ tend to infinity, $h(x)$ will be forced to zero, leading the Lagrangian to converge to the same solution as the original problem.
+
+The algorithm proceeds as follows:
+\begin{gather*}
+	x_{k+1} = \underset{x}{\text{argmin}} \hspace{.5em} \mathcal{L}_\beta(x,\lambda_k) \\
+	\lambda_{k+1} = \lambda_k + \sigma_k h(x_{k+1})
+\end{gather*}
+
+where $\sigma_k$ is the step size at iteration $k$. Then in each step the penalty parameter $\beta_k$ is increased or kept the same, depending on the size of the constraint violation. This continues until an acceptable solution has been found:
+
+\begin{equation}
+	||h(x_k)|| \leq \tau_1 \hspace{.5em}\text{and}\hspace{.5em} ||\nabla_x\mathcal{L}_{\beta_k}(x_k,\lambda_k)|| \leq \tau_2
+\end{equation}
+
+with $\tau_1,\tau_2$ the chosen tolerances.
+
+\section{Applied}
+
+The OCP equation \ref{ocp-eq2} of training a neural net with MSE loss function is a nonlinear least squares problem:
+
+\begin{equation*}
+	\begin{aligned}
+	& \text{min}
+	&  & \frac{1}{2} ||F(x)||^2_2 \\
+	& \text{s. t.}
+	& &  h(x) = 0
+	\end{aligned}
+\end{equation*}
+
+The minimization problem that will be solved in each iteration is then:
+
+\begin{equation}
+	\begin{aligned}
+	 & \underset{x}{\text{min}} & \mathcal{L}_{\beta}(x,\lambda) 
+	     &= \frac{1}{2} ||F(x)||^2_2 + <\lambda,h(x)> + \frac{\beta}{2} || h(x) ||^2_2 \\
+	 & & &= \frac{1}{2} ||F(x)||^2_2 + \frac{\beta}{2} ||h(x) + \lambda/\beta ||^2_2 - \frac{1}{2\beta} ||\lambda||^2_2 \\
+	 & & &= \frac{\beta}{2} \Big|\Big|
+		\begin{bmatrix}
+			F(x)/\sqrt{\beta} \\
+			h(x) + \lambda/\beta
+		\end{bmatrix} \Big|\Big|^2_2 \\
+	 & & &= \frac{\beta}{2} ||M_{\beta}(x,\lambda)||^2_2
+	\end{aligned}
+	\label{loss}
+\end{equation}
+
+Instead of using the textbook algorithm, a more recent paper algorithmic framework is adapted to the problem, shown in Algorithm \ref{}
+
+\begin{algorithm}[H]
+\SetAlgoLined
+\KwIn{penalty parameter $\beta$, stopping tolerance $\tau$}
+weight and state variables $x_0$,  $\lambda_0 = \mathcal{N}(0,1)$ \;
+ \For{k = 0,1,...}{
+ 	$\eta_k = 1/\beta^k$\;
+ 	find $x_{k+1}$ such that \\
+ 	$||\nabla_xM_{\beta}(x,\lambda_k)|| \leq \eta_k$ \\
+ 	$\sigma_{k+1} = \text{min}\big(\frac{||h(x_0)||\log^22}{||h(x_k+1)||k \log^2(k+1)},1\big)$ \\
+ 	$\lambda_{k+1} = \lambda_k + \sigma_{k+1}h(x_k+1)$ \\
+ 	
+ 	Stop if \\
+ 		...
+ }
+ \caption{Inexact Augmented Lagrangian Method}
+\end{algorithm}
+
+
 TODO: cite textbook, 1906
 
 
@@ -19,14 +102,6 @@ Instead of using fmincon, now an Augmented Lagrangian Method (ALM) is used to so
 
 This is a nonlinear least squares problem:
 
-\begin{equation*}
-	\begin{aligned}
-	& \text{min}
-	&  & \frac{1}{2} ||F(x)||^2_2 \\
-	& \text{s. t.}
-	& &  h(x) = 0
-	\end{aligned}
-\end{equation*}
 
 The ALM is designed to solve this sort of problem. It constructs an unconstrained problem by adding the constraints in both a penalty and a lagrangian term. The lagrangian cost function looks like this:
 
