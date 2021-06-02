@@ -8,15 +8,15 @@ The optimal control problem (OCP) of training a neural network in \ref{ocp-eq} t
 \begin{equation}
 	\begin{aligned}
 	& \underset{W}{\text{minimize}}
-	& & \sum\limits_{j=0}^{n}||W_Lz_{L,j} - y_j||^2_2 \\
+	& & \sum\limits_{j=0}^{n}||\sigma_L(W_Lz_L) - y_j||^2_2 \\
 	& \text{subject to}
-	& & z_{0,j} = x_j \\
-	& & & z_{k+1,j} = \sigma(W_kz_{k,j} + b_k,0), &k = 0,\ldots,L-1,j = 1,\ldots,n
+	& & z_{1,j} = \sigma_0(W_0,x_j), &j = 1,\ldots,n \\
+	& & & z_{k+1,j} = \sigma_k(W_kz_{k,j}), &k = 1,\ldots,L-1,j = 1,\ldots,n
 	\end{aligned}
 	\label{ocp-eq2}
 \end{equation}
 
-This is a nonlinear program with nonlinear equality constraints. It's possible to eliminate the states $z_k$ using the dynamics, giving rise to an unconstrained nonlinear program as follows:
+This is a nonlinear program with nonlinear equality constraints. It is possible to eliminate the states $z_k$ using the dynamics, giving rise to an unconstrained nonlinear program as follows:
 
 \begin{equation}
 	\begin{aligned}
@@ -25,7 +25,7 @@ This is a nonlinear program with nonlinear equality constraints. It's possible t
 	\end{aligned}
 \end{equation}
 
-Where $f_W$ is the neural network as a function as in \ref{nnfnc}. Solving this problem would be the single shooting approach. One can find the gradient of this function using dynamic programming techniques, leading again to the backpropagation algorithm. A full derivation of the backpropagation algorithm using control theory can be found in Mizutani et al. \cite{mizutani2000} and Dreyfus et al. \cite{dreyfus1990}
+where $f_W$ is the neural network as a function as in \ref{nnfnc}. Solving this problem would be the single shooting approach. One can find the gradient of this function using dynamic programming techniques, leading again to the backpropagation algorithm. A full derivation of the backpropagation algorithm using control theory can be found in Mizutani et al. \cite{mizutani2000} and Dreyfus et al. \cite{dreyfus1990}
 
 This thesis instead tries to solve equation \label{ocp-eq2} directly, which corresponds to a multiple shooting approach.
 
@@ -43,7 +43,7 @@ y_j = -.8\sin(x_j) + \mathcal N(0,\delta), x \in [0,1], j = 1..N
 
 where $\delta=0.1$ adds noise, and $N$ is the number of datapoints. The input-output pairs $(x_j,y_j)$ are split into a training set of size $\frac{4}{5}N$ and a test set of size $\frac{1}{5}N$. Figure \ref{trainlm} plots this function and shows the output of a network which has been fit using \texttt{trainlm}. This is also a clear example of overfitting.
 
-This test problem, as well as the test problem used in chapter 3, \ref{}, come from the course on neural networks given at the KULeuven \cite{}. [version numbers, hardware specs]
+This test problem, as well as the test problem used in chapter 3, \ref{}, come from the course on neural networks given at KU Leuven \cite{}. [version numbers, hardware specs]
 
 \begin{figure}
 	\centering

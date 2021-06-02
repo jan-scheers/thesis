@@ -1,16 +1,11 @@
-
 \documentclass[master=wit,english]{kulemt}
-\usepackage{subcaption}
-\usepackage{graphicx,amsmath,amssymb}
-\usepackage{changepage}
-\usepackage[ruled,vlined]{algorithm2e}
 \setup{% Verwijder de "%" op de volgende lijn bij UTF-8 karakterencodering
   %inputenc=utf8,
   title={Avoiding local minima in Deep Learning: a nonlinear optimal control approach},
   author={Jan Scheers},
   promotor={Prof.\,dr.\,ir.\ Panos Patrinos},
-  assessor={},
-  assistant={}}
+  assessor={Prof.\,dr.\,ir.\ Dirk Nuyens\\Prof.\,dr.\,ir.\ Johan Suykens},
+  assistant={ir.\ Brecht Evens}}
 % Verwijder de "%" op de volgende lijn als je de kaft wil afdrukken
 %\setup{coverpageonly}
 % Verwijder de "%" op de volgende lijn als je enkel de eerste pagina's wil
@@ -21,6 +16,12 @@
 \setup{font=lm}
 
 % Hier kun je dan nog andere pakketten laden of eigen definities voorzien
+
+\usepackage{subcaption}
+\usepackage{graphicx,amsmath,amssymb}
+\usepackage{placeins}
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{multirow}
 
 % Tenslotte wordt hyperref gebruikt voor pdf bestanden.
 % Dit mag verwijderd worden voor de af te drukken versie.
@@ -39,16 +40,34 @@
 
 \begin{preface}
   I would like to thank everybody who kept me busy the last year,
-  especially my promoter and my assistants. I would also like to thank the
+  especially my promoter and my assistant. I would also like to thank the
   jury for reading the text. My sincere gratitude also goes to my friends and my family.
 \end{preface}
 
 \tableofcontents*
 
 \begin{abstract}
+Huidige optimalisatiealgoritmes voor het trainen van diepe neurale netwerken zijn gebaseerd op gradi\"ent-afdalingsmethoden, die gebruik maken van het backpropagation algoritme om de gradi\"ent te berekenen. Deze algoritmes worden alom gebruikt en hebben een lange geschiedenis, maar hebben nog altijd enkele valkuilen zoals het probleem van "slechte" locale minima, waar het stationair punt gevonden door het algoritme slechter veel slechter presteert dan het globale minimum, of ook het "verdwijnende/ontploffende gradi\"ent" probleem. Sommige andere strategi\"en zijn geweest om de initialisatie te verbeteren, of om "vervroegd stoppen" aan te wenden om overfitting te vermijden.
 
+Het trainen van een neuraal netwerk is een optimalisatieprobleem dat kan geherformuleerd worden in een context van optimale regeltechniek. Dit is een nieuw perspectief dat toelaat om backpropagation als een "single shooting" methode te zien, maar ook de gelegenheid geeft om een nieuwe oplossingsmethode voor te stellen op basis van "multiple shooting". In de theorie van regeltechniek wordt deze methode vaak aangewend voor het oplossen van zeer niet-lineaire problemen.
+
+Het success van het backpropagation algoritme heeft er voor gezorgd dat weinig pogingen zijn gedaan om een alternatief te zoeken. In deze masterproef wordt de "multiple shooting" methode uitgewerkt. Er wordt een methode van de geaugmenteerde Lagrangiaan geimplementeerd om de haalbaarheid te onderzoeken van het trainen van neurale netwerken als een optimaal sturingsprobleem. Het nieuw algoritme wordt dan vergeleken met standaard backpropagation-optimalisatiealgoritmes die in de praktijk worden gebruikt.
+
+Voor kleine problemen kan het nieuw algoritme concurreren zowel in termen van snelheid als qualiteit van oplossing. Voor een benaderingsprobleem dat traditioneel moeilijk trainbaar is met huidige gradi\"ent-afdalingsmethoden door het "afstervende ReLU" probleem, convergeert het nieuw algoritme vaker tot een goede oplossing. Het schaalt echter niet goed voor trainingsproblemen met grote datasets. Het is ook alleen toepasbaar op benaderingsproblemen met "mean squared error" als loss functie. In toekomstig onderzoek kunnen andere algoritmes onderzocht worden in plaats van de geaugmenteerde Langrangiaan methode. Ook kan het algoritme uitgebreid worden om andere loss functies te aanvaarden, wat het breder toepasbaar zou maken. Ten slotte kan een batch training modus het algoritme schaalbaarder maken voor grote datasets.
 
 \end{abstract}
+
+\begin{abstract}
+Current optimization algorithms for training deep neural network models are based on gradient descent methods, which use the backpropagation algorithm calculate the gradient. These established algorithms have a long history and work well in practice, but still have some pitfalls such as "bad" local minima, where the stationary point found by the algorithm has worse performance than the global minimum, or also the "vanishing/exploding gradient" problem. Most improvements to these algorithms have been by refining the gradient descent algorithm such as by adding a momentum facor, or by Nesterov acceleration. Some other strategies have been to improve the initialization or to use "early stopping" to avoid overfitting.
+
+The optimization problem of neural network training can be reformulated in an optimal control theory context. This is a perspective which allows one to view backpropagation as a "single shooting" method, but also gives the opportunity to propose new solution methods using "multiple shooting". In control theory this approach often works well for highly nonlinear problems. 
+
+The success of the backpropagation algorithm means few attempts have been made to propose an alternative. In this thesis the "multiple shooting" method is investigated. An augmented Lagrangian method is implemented to evaluate the feasibilty of solving neural network training as an optimal control problem using "multiple shooting". The novel algorithm is then compared to industry standard backpropagation algorithms.
+
+For small problems the novel algorithm shows performance and speed comparable to current standard algorithms. A regression problem which is difficult to train for traditional gradient descent algorithms due to a "dying ReLU" problem, converges more often using the novel algorithm.  However it scales poorly for training problems with large data sets. It also only works on regression problems using mean squared error loss. In future research different algorithmic frameworks can be explored instead of the Augmented Lagrangian method. ALso expanding the algorithm to handle different loss functions would make it more widely applicable, and implementing a batch training mode would improve scalability.
+\end{abstract}
+
+
 
 % Een lijst van figuren en tabellen is optioneel
 %\listoffigures
@@ -62,28 +81,28 @@
 \begin{flushleft}
   \renewcommand{\arraystretch}{1.1}
   \begin{tabularx}{\textwidth}{@{}p{12mm}X@{}}
-  	ANN & Artificial Neural Network \\
-  	MSE & Mean Squared Error \\
-  	GD & Gradient Descent \\
-  	BP & Backpropagation \\
-  	OCP & Optimal Control Problem \\
-  	MS & Multiple Shooting \\
-  	NLP & Non-Linear Program \\
+  	AD & Algorithmic Differentiation \\
+  	ADAM & ADaptive Moment Estimation \\
+  	AL & Augmented Lagrangian \\
   	ALM & Augmented Lagrangian Method \\
+  	ANN & Artificial Neural Network \\
+  	BP & Backpropagation \\
   	DNN & Deep Neural Network \\
-  	SGD & Stochastic Gradient Descent
+  	GD & Gradient Descent \\
+  	LS & Least Squares \\
+  	MS & Multiple Shooting \\
+  	MSE & Mean Squared Error \\
+  	NLP & Non-Linear Program \\
+  	OCP & Optimal Control Problem \\
+  	SGD & Stochastic Gradient Descent \\ 
   \end{tabularx}
 \end{flushleft}
 \section*{Symbols}
 \begin{flushleft}
   \renewcommand{\arraystretch}{1.1}
   \begin{tabularx}{\textwidth}{@{}p{12mm}X@{}}
-    42    & ``The Answer to the Ultimate Question of %Life, the Universe,
-            and Everything'' according to \cite{h2g2} \\
-    $c$   & Speed of light \\
-    $E$   & Energy \\
-    $m$   & Mass \\
-    $\pi$ & The number pi \\
+    $\mathcal{L}_{\beta}$   & $\beta$-Augmented Lagrangian \\
+    $\mathcal{N}(\mu,\sigma)$ & Normal distribution with mean $\mu$, std. dev. $\sigma$
   \end{tabularx}
 \end{flushleft}
 
@@ -102,6 +121,7 @@
 \appendixpage*          % indien gewenst
 \appendix
 \include{app-A}
+\include{app-B}
 % ... en zo verder tot
 \include{app-n}
 

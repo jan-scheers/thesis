@@ -9,17 +9,17 @@ import time
 
 rng = np.random.default_rng()
 delta = 0.1
-W = 8
+W = 16
 K = 20
 
-sigma  = lambda x: tf.math.tanh(x)
-sigma_ = lambda x: 2/(np.cosh(2*x)+1)
+sigma  = lambda x: tf.nn.relu(x)
+sigma_ = lambda x: np.greater(x,0,x)
 
 tau  = lambda x: x
 tau_ = lambda x: np.ones(x.shape)
 
 
-for N in [10,20,40]:
+for N in [20,40,80]:
     x = np.linspace(0,np.pi,N).reshape((N,1))
     y = np.sin(x*x)+rng.normal(0,delta,x.shape)
     per = rng.permutation(N)
@@ -27,8 +27,8 @@ for N in [10,20,40]:
     te = np.empty((K,4))
     for k in range(K):
         madam = keras.Sequential() 
-        madam.add(keras.layers.Dense(activation="tanh",units=W,input_shape=(x.shape[1],)))
-        madam.add(keras.layers.Dense(activation="tanh",units=W))
+        madam.add(keras.layers.Dense(activation="relu",units=W,input_shape=(x.shape[1],)))
+        madam.add(keras.layers.Dense(activation="relu",units=W))
         madam.add(keras.layers.Dense(units=y.shape[1]))
         adam = keras.optimizers.Adam()
         es = keras.callbacks.EarlyStopping(monitor='loss',patience=10)
@@ -57,10 +57,10 @@ for N in [10,20,40]:
         print("t: ",t2,"k: ",e2, 'loss: ', hist2['loss'][-1])
     
         te[k,:] = [t1,t2,e1,e2]
-        with open('testtanhn.npy','ab') as f:
+        with open('testrelun.npy','ab') as f:
             np.save(f,np.array(hist.history['loss']))
             np.save(f,np.concatenate([np.array(value) for value in hist2.values()]).reshape((3,-1)).transpose())
-    with open('testtanhn.npy','ab') as f:
+    with open('testrelun.npy','ab') as f:
         np.save(f,te)
 
    

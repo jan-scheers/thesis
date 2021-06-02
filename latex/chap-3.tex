@@ -14,98 +14,155 @@ Because the goal of this thesis is to compare training performance, overfitting 
 \begin{equation}
 (1+\epsilon)C(W_{k+1}) > C(W_k)
 \end{equation}
+
 Where $C(W_k)$ is the loss at epoch $k$ and $\epsilon$ is a small tolerance value. Because ALM only takes only a few costly epochs to converge, it should make sense to not wait many epochs to confirm that the method has stagnated its progress. On the other hand the main algorithm against which the ALM method will be compared is the ADAM algorithm, which may take thousands of epochs to converge. To find the minimum in the training loss the \texttt{EarlyStopping} method implemented in \texttt{keras} will be used. This method has a patience value $p$, meaning that the training will stop once $p$ epochs have passed without any improvement.
  
 
 \section{Test setup}
 Each test will average the results over many training runs so as to get a more accurate and fair picture of the performance that can be expected from each algorithm. Typically each test will use 20 training runs.
 
-The weights of the network will be initialized using Xavier initialization for the layers using the $\tanh(x)$ activation function and Kaiming initialization for the layers using the ReLU activation function, as is standard in practice. Both algorithms will start with the same initalization in each comparison.
+The training performance of ALM will be compared to the ADaptive Moment Estimation (ADAM) optimizer, which is a type of Stochastic Gradient Descent (SGD) method. This optimizer is widely used and is generally known to be robust (Goodfellow et al. \cite{Goodfellow-et-al-2016}, Sec. 8.5.3). Even though it is usually used in a mini-batch manner, the datasets in these problems are so small that the batch size is set to be as large as the dataset. This effectively makes it a true Gradient Descent method instead of an SGD. The learning rate is left at the default $0.001$. 
+
+The weights of the network will be initialized using Xavier initialization for layers using the $\tanh(x)$ activation function and Kaiming initialization for layers using the ReLU activation function. Both training algorithms will start from the same initial point for each test. ADAM will halt when 10 epochs have passed without improvement, indicating a local minimum has been reached. For ALM the training will halt after a single epoch has passed without significant improvement:
+
+\begin{equation}
+(1+\epsilon)F(u_{k+1}) > F(u_k)
+\end{equation}
+
+Where $F(u_k)$ is the loss at epoch $k$ and $\epsilon$ is chosen to be $1e^{-2}$.
 
 All tests are run on .... , GBS,
 
 \section{Fully connected feedforward network}
-For the first comparison a similar regression problem as in chapter one will be considered. In a first try the same sine function was used as in equation \ref{} in chapter 1. The issue with this function is that it is too simple of a training problem. Both algorithms converge quite quickly to a very good solution, one of which is shown in figure \ref{}, and it is difficult to differentiate the algorithms. 
-
-For this reason a problem with more depth is required. In this first test a squared sine function will be approximated instead. This function oscillates progressively faster, so that the training algorithm can always keep finding a better solution. Figure \ref{} shows how different training configurations let a network approximate a larger or smaller segment of the function. The function definition is as follows:
+For the first comparison a similar regression problem as in Chapter 2 will be considered. The sine function in equation \ref{sin} is quite simple, therefore a problem with a more depth is considered: a squared sine function. The function definition is as follows: 
 
 \begin{equation}
 y = \sin^2(x) + \mathcal N(0,\delta), x \in [0,\pi]
+\label{sin2}
 \end{equation}
 
 \begin{figure}
+     \centering
+     \begin{subfigure}[b]{0.49\textwidth}
          \centering
-         \includegraphics[width=\textwidth]{sine_squared}
-         \caption{Feedforward network with 2 hidden layers of 20 relu units, trained on test function using ALM, using 80 training pairs}
+         \includegraphics[width=\textwidth]{almgood}
+         \caption{Example of good convergence}
+         \label{almgood}
+     \end{subfigure}
+     \begin{subfigure}[b]{0.49\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{almgoodconv}
+         \caption{Training history of convergence}
+         \label{almgoodconv}
+     \end{subfigure}
+     \caption{Example of convergence behaviour of ALM optimizer for network using $tanh$ activation and 40 data points. The network has 2 hidden layers of 8 nodes. An example of bad convergence could not be found for the $tanh$ activation function using ALM.}
+     \label{almconv}
 \end{figure}
 
-The training performance of the ALM method will be compared to the Stochastic Gradient Descent (SGD) method implemented in \texttt{keras}. The weights of the network will be initialized using Xavier initialization for the layers using the $\tanh(x)$ activation function and Kaiming initialization for the layers using the ReLU activation function. Both training algorithms will start from the same initial point for each test. Training will stop when progress on the training loss stagnates, indicating a local minimum has been reached. For SGD the \texttt{EarlyStopping} class will be used to stop the training when 4 epochs have passed without improvement, while for ALM the following stopping criterion will be used:
+\begin{figure}
+     \begin{subfigure}[b]{0.49\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{adamgood}
+         \caption{Example of good convergence}
+         \label{adamgood}
+     \end{subfigure}
+     \begin{subfigure}[b]{0.49\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{adambad}
+         \caption{Example of bad convergence}
+         \label{adambad}
+     \end{subfigure}
+     \begin{subfigure}[b]{0.49\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{adamgoodconv}
+         \caption{Training history of good convergence}
+         \label{adamgoodconv}
+     \end{subfigure}
+     \begin{subfigure}[b]{0.49\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{adambadconv}
+         \caption{Training history of bad convergence}
+         \label{adambadconv}
+     \end{subfigure}
+    \caption{Examples of convergence behaviour of ADAM optimizer for network using ReLU activation and 40 data points. The network has 2 hidden layers of 16 nodes.}
+    \label{adamconv}
+\end{figure}
 
-\begin{equation}
-(1+\epsilon)C(W_{k+1}) > C(W_k)
-\end{equation}
-Where $C(W_k)$ is the loss at epoch $k$ and $\epsilon$ is chosen to be $1e^{-2}$.
+This function oscillates progressively faster, and the training algorithm will not always find a good solution. Figure \ref{adamconv} shows two examples runs of the ADAM optimizer for 4000 epochs. The only difference is the choice of initial weights and the random noise. The first example has converged well, and would probably improve even further if the number of epochs was increased. The second example has stagnated in a bad minimum. Figure \ref{almconv} shows an example run of the ALM optimizer for 12 epochs using the $tanh$ activation function. An example of bad convergence using this activation could not be found.
 
-In the first test the effect of the number of datapoints is analyzed, by taking a neural network
+For the first experiment two similar networks are trained to approximate function \ref{sin2}. The first network has 2 hidden layers of 8 nodes with $tanh$ activation function, the second has 2 hidden layers of 16 nodes with a ReLU activation function. Each is trained with progressively more data points. Every single configuration is run 20 times. The results are listed in table \ref{restab}. The code from this test is found in appendix \ref{app:B}
 
-sine regression
+\begin{table}
+\renewcommand{\arraystretch}{1.3}
+\centering
+\footnotesize
+\makebox[\textwidth][c]{
+\begin{tabular}{r | r| c c c c c || r| c c c c c|}
+\multicolumn{1}{c}{} & \multicolumn{6}{c}{$\sigma(\cdot) = \tanh(\cdot)$} & 
+                       \multicolumn{6}{c}{$\sigma(\cdot) = \max(\cdot,0)$} \\\cline{2-13}
+%    ADAM& \multirow{2}{*}{10} & $1.28e^{-2} $ & $ 1.56e^{-12}$ & $ 120 $ & $ 926 $ & $ 19 $ & \multirow{2}{*}{20} & $3.73e^{-2} $ & $ 2.89e^{-4} $ & $ 41.0 $ & $ 351 $  & $ 12$ \\
+%    ALM & 				      & $3.77e^{-2} $ & $ 9.05e^{-3} $ & $ 1.39$ & $ 6.40$ & $ 20 $ & 				      & $8.48e^{-2} $ & $ 4.97e^{-4} $ & $ 2.52 $ & $ 6.47 $ & $ 17$ \\ \cline{2-13}
+%    ADAM& \multirow{2}{*}{20} & $4.44e^{-3} $ & $ 6.90e^{-4} $ & $ 117 $ & $ 878 $ & $ 16 $ & \multirow{2}{*}{40} & $6.34e^{-2} $ & $ 8.51e^{-3} $ & $ 53.0 $ & $ 478 $  & $ 9 $ \\
+%    ALM & 					  & $1.07e^{-1} $ & $ 4.40e^{-3} $ & $ 8.29$ & $ 7.47$ & $ 19 $ & 					  & $9.85e^{-2} $ & $ 6.99e^{-3} $ & $ 8.69 $ & $ 5.42 $ & $ 12 $\\ \cline{2-13}
+%    ADAM& \multirow{2}{*}{40} & $8.49e^{-3} $ & $ 7.54e^{-3} $ & $ 118 $ & $ 939 $ & $ 15 $ & \multirow{2}{*}{80} & $6.55e^{-2} $ & $ 4.14e^{-2} $ & $ 38.8 $ & $ 352 $  & $ 10 $\\
+%    ALM &                     & $2.22e^{-2} $ & $ 8.56e^{-3} $ & $ 7.94$ & $ 7.05$ & $ 20 $ &                     & $9.23e^{-2} $ & $ 2.24e^{-2} $ & $ 14.2 $ & $ 4.12 $ & $ 17 $\\ \cline{2-13}
+
+        &                   N & avg MSE       & best MSE        & time(s)  & epochs   & conv   &                   N & avg MSE        & best MSE       & time(s)  & epochs   & conv   \\ \cline{2-13}
+    ADAM& \multirow{2}{*}{10} & $ 2.09e^{-2} $ & $1.20e^{-11} $ & $ 18.7 $ & $ 3790 $ & $ 17 $ & \multirow{2}{*}{20} & $ 1.22e^{-1} $ & $ 3.15e^{-3} $ & $ 30.3 $ & $ 3500 $ & $ 5  $ \\
+    ALM & 				      & $ 2.10e^{-1} $ & $ 1.59e^{-1} $ & $ 1.85 $ & $ 6.38 $ & $ 16 $ & 				     & $ 1.63e^{-1} $ & $ 1.08e^{-2} $ & $ 4.41 $ & $ 5.47 $ & $ 15 $ \\ \cline{2-13}
+    ADAM& \multirow{2}{*}{20} & $ 1.25e^{-2} $ & $ 9.84e^{-4} $ & $ 19.8 $ & $ 3960 $ & $ 17 $ & \multirow{2}{*}{40} & $ 6.28e^{-2} $ & $ 8.85e^{-3} $ & $ 22.4 $ & $ 2690 $ & $ 5  $ \\
+    ALM & 					  & $ 5.87e^{-2} $ & $ 7.69e^{-3} $ & $ 8.06 $ & $ 7.50 $ & $ 20 $ & 					 & $ 9.89e^{-2} $ & $ 1.37e^{-2} $ & $ 8.09 $ & $ 5.11 $ & $ 18 $ \\ \cline{2-13}
+    ADAM& \multirow{2}{*}{40} & $ 2.56e^{-2} $ & $ 7.58e^{-3} $ & $ 19.2 $ & $ 3920 $ & $ 15 $ & \multirow{2}{*}{80} & $ 7.61e^{-2} $ & $ 7.64e^{-3} $ & $ 29.9 $ & $ 3150 $ & $ 4  $ \\
+    ALM &                     & $ 1.61e^{-2} $ & $ 7.90e^{-3} $ & $ 11.6 $ & $ 6.90 $ & $ 20 $ &                     & $ 1.02e^{-1} $ & $ 1.03e^{-2} $ & $ 25.3 $ & $ 4.21 $ & $ 14 $ \\ \cline{2-13}
+
+
+\end{tabular}
+}
+\caption{Results of tests using $\tanh$ and ReLU activation function.}
+\label{restab}
+
+\end{table}
+
+The last column of each subtable in table \ref{restab} shows the number of runs per batch which converged to a acceptable solution, which is defined as having an MSE of less than $0.25$. For reference, the MSE of a straight line $y=0$ has an MSE of approximately $0.55$. This choice is based on experimental results: figure \ref{hist} shows the histograms of the MSE of both methods for the test batch using ReLU activation function and 40 data points. They show a clear bimodal distribution, differentiating those runs which converged, and those which did not.
+
+\begin{figure}
+     \centering
+     \begin{subfigure}[b]{0.49\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{hist}
+         \caption{Histogram of MSE of test batch using ADAM optimizer and 40 data points}
+         \label{adamhist}
+     \end{subfigure}
+     \begin{subfigure}[b]{0.49\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{almhist}
+         \caption{Histogram of MSE of test batch using ALM optimizer and 40 data points}
+         \label{almhist}
+     \end{subfigure}
+     \caption{Histograms of MSE batch using 40 data points and ReLU activation function. Both histograms show a bimodal distribution}
+     \label{hist}
+\end{figure}
+
+
+The avg MSE, time and epochs has only been calculated over those runs which converged. In the best runs, ADAM typically beats ALM in performance, and could probably even improve further given more epochs. However on average the performance is similar, and ALM converges more often than ADAM. 
+
+The network using ReLU activation function is especially difficult to train, as ADAM only converges 14 times in 60 total runs. In comparison ALM converges 47 times. This may be expected as the main strength of ReLU is found in large networks. In this network the "dying ReLU" problem seems to appear often \cite{Lu2020}. Because the derivative of ReLU is zero for all negative inputs, some nodes may get stuck and receive no gradient updates in a Gradient Descent method such as ADAM. On the other hand, the extra degrees of freedom in the ALM method may allow it to avoid this problem more often.
+
+Another point is that the run time of ALM scales approximately quadratically with the amount of data points N, while the runtime of ADAM stays constant. This is because the size of the Jacobian in ALM scales approximately quadratically with N, see equation \ref{}. In backpropagation the only factor which scales with N is the computation of the loss in the forward pass, which must be executed for every sample. This test has a small dataset, for which the computation of the loss is small compared to the other parts of the ADAM algorithm. In Big Data problems this cost is mitigated by using mini-batches to compute an approximate gradient instead of computing over the whole dataset. This idea could be applied to the ALM method, but this is left for future work.
 
 
 
 
 
+
+
+%\begin{figure}[p]
+%         \centering
+%         \includegraphics[width=\textwidth]{sine_squared}
+%         \caption{Feedforward network with 2 hidden layers of 20 relu units, trained on test function using ALM, using 80 training pairs}
+%\end{figure}
 
 \begin{itemize}
-\item sine regression
-
-	\item compare until validation performance under ...
-	\item relu vs tanh
-	\item depth of network
-	\item width of network
-	\item number of input-output pairs
-	\item scalability
-	
-	
-	
-\begin{itemize}
-	\item Optimization for deep learning: theory and algorithms
-	\item Goals of optimization
-	\item Problem formulation
-	\item Gradient descent:
-	\item Tips  tricks
-	\item State of the art algorithms
-\end{itemize}
-
-
-
-
-
-
-
-\item
-\cite{sun2019optimization}
-\begin{itemize}
-	\item Optimization for deep learning: theory and algorithms
-	\item Goals of optimization
-	\item Problem formulation
-	\item Gradient descent:
-	\item Tips  tricks
-	\item State of the art algorithms
-\end{itemize}
-
-
-\item
-\cite{dreyfus1990}
-
-"The Kelley-Bryson gradient
-formulas for such problems have been rediscovered by neural-
-network researchers and termed back propagation"
-
-\item
-\cite{Birgin2009}
-
-Practical Augmented lagrangian method
-
 \item
 \cite{jacot2020neural}
 "Indeed
@@ -114,23 +171,7 @@ of saddle points which may slow down the convergence (4). A number of results (3
 that for wide enough networks, there are very few "bad" local minima, i.e. local minima with much
 higher cost than the global minimum"
 \item
-\cite{Rumelhart1986}
-Original Backpropagation paper
 
-
-\end{itemize}
-
-\section{Needed}
-
-\begin{itemize}
-\item
-Basic Neural network intro
-
-\item
-Optimal control 
-
-\item
-Simultaneous approach
 \end{itemize}
 
 

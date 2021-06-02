@@ -8,22 +8,15 @@ ANNs are composed of 'neurons', which are in some ways analogous to biological n
       y = \sigma(w_1x_1+w_2x_2+...+w_nx_n + b)
 \end{equation}
 
-$w_i$ are the weights, $x_i$ are the inputs to the neuron, which come either from a previous neuron, or are fed into the network, $\sigma$ is the activation function, and finally a bias $b$ is also added to the sum. This is the McCulloch-Pitts neuron model[REF]. The most commonly used activation function $\sigma$ is the Rectified Linear Unit (ReLU):
+where $w$ are the weights, $x$ are the inputs to the neuron, which come either from a previous neuron, or are fed into the network, $\sigma$ is the activation function, and finally a bias $b$ is also added to the sum. This is the McCulloch-Pitts neuron model[REF]. The most commonly used activation function $\sigma$ is the Rectified Linear Unit (ReLU):
 
 \begin{equation}
       \sigma(x) = x^+ = \max(0,x)
 \end{equation}
 
-Many other activation functions are possible, such as the sigmoid function ($\frac{1}{1+e^{-x}}$) or the hyperbolic tangent function ($\tanh(x)$).
+Many other activation functions are possible, such as the sigmoid function ($\frac{1}{1+e^{-x}}$) or the hyperbolic tangent function ($\tanh(x)$). TODO: explain properties, show plot
 
-A visual representation is shown in figure \ref{neural:neur}. A full network is built by connecting layers of neurons as shown in figure \ref{neural:net}. An ANN can also be expressed as a combination of function composition and matrix multiplication, ignoring for a moment the bias vectors.
-
-\begin{equation}
-         f(W,x) = W_L\sigma(W_{L-1}\sigma(...W_1\sigma(W_0x)...))
-         \label{nnfnc}
-\end{equation}
-
-where $W_n$ are the matrixes of the connection weights and $L$ is the depth of the network. 
+A visual representation is shown in figure \ref{neural:neur}. A full network is built by connecting layers of neurons as shown in figure \ref{neural:net}.
 
 
 
@@ -35,13 +28,13 @@ where $W_n$ are the matrixes of the connection weights and $L$ is the depth of t
 		\caption{Deep Neural Network}
 		\label{neural:net}
 	\end{subfigure}
-	%\caption{Feedforward Deep Neural Network. (Retrieved from https://towardsdatascience.com)}
+	%\caption{Feedforward Deep Neural Network. \cite}
 	\begin{subfigure}[b]{0.4\textwidth}
 		\includegraphics[width=\textwidth]{neuron}
 		\caption{Single Neuron}
 		\label{neural:neur}
 	\end{subfigure}
-	\caption{Feedforward Deep Neural Network and Single Neuron - McCulloch-Pitts model. (Retrieved from https://towardsdatascience.com)}
+	\caption{Feedforward Deep Neural Network and Single Neuron - McCulloch-Pitts model \cite{dertat2017}.}
 	\label{neural}
 \end{figure}
 
@@ -50,33 +43,36 @@ where $W_n$ are the matrixes of the connection weights and $L$ is the depth of t
 \section{Neural Network Training}
 Training a neural network is an optimization problem as we will discuss in this section. Ruoyu Sun covers in \cite{sun2019optimization} the current theory and algorithms for optimizing deep neural networks, upon which much of this section is based.
 
-In a supervised learning problem a dataset of inputs and desired outputs is given: $x_i \in \mathbb{R}^{d_x}, y_i \in \mathbb{R}^{d_y}, i = 1,\dots,n$ with $x_i$ the input vectors, $y_i$ the desired output vectors and $n$ the number of data points. We want the network to predict the output $y_i$ based on the information in $x_i$, i.e. we want the network to learn the underlying mapping that connects the data. A standard fully connected network can be expressed as a combination of function composition and matrix multiplication as follows:
-
+In a supervised learning problem a dataset of inputs and desired outputs is given: $x_i \in \mathbb{R}^{d_x}, y_j \in \mathbb{R}^{d_y}, i = 1,\dots,n$ with $x_i$ the input vectors, $y_i$ the desired output vectors and $n$ the number of data points. We want the network to predict the output $y_i$ based on the information in $x_i$, i.e. we want the network to learn the underlying mapping that connects the data. A standard fully connected network can be expressed as a combination of function composition and matrix multiplication as follows:
 
 \begin{equation}
-         f_W(x) = W_L\sigma(W_{L-1}\sigma(...W_1\sigma(W_0x)...))
+         f_W(x) = \sigma_L(W_L\sigma(W_{L-1}\sigma_1(...W_1\sigma_0(W_0x)...)))
+         \label{funeq}
 \end{equation}
 
-where $L$ is the number of hidden layers in the network, $W_j$ are matrixes of dimension $d_j \times d_{j-1}, j=1 \dots L$ containing the connection weights and $\sigma$ is the activation function. The bias vectors $b_i$ have been omitted from this equation for clarity.
+where $L$ is the number of hidden layers in the network and $\sigma_k$ is the activation function in each layer. In this equation, and also in the rest of the thesis, the bias vectors $b_k$ have been included in the weight matrixes:
+\begin{equation}
+W_k = \begin{bmatrix} W_{k,orig} & b_k \end{bmatrix}
+\end{equation}
+where $W_k$ are the matrixes of dimension $d_k \times (d_{k-1}+1), k=1 \dots L$ containing the connection weights extended with the bias vector $b_k$. Therefore the matrix multiplication in function \ref{funeq} implicitly also contains the operation of extending the input vector with a constant $1$ value. This simplifies the notation throughout the thesis
 
 This function can also be defined recursively, which will be useful for later interpreting the network in an optimal control context.
 
 \begin{equation}
 	\begin{aligned}
 	z_0 &= x \\
-	z_{k+1} &= \sigma(W_kz_k + b_k), & k = 0,...,L-1 \\
-	f_W(x) &= W_Lz_L + b_L \\
+	z_{k+1} &= \sigma_k(W_kz_k), & k = 0,...,L \\
+	f_W(x) &= z_{L+1} \\
 	\end{aligned}
 \label{st-eq}
 \end{equation}
-where $b_k$ are the bias vectors, and the other variables are as defined before.
 
 We want to pick the parameters of the neural network so that the predicted output $\hat{y}_i = f_W(x_i)$ is as close as possible to the true output $y_i$ for a certain distance metric $\mathit{l(\cdot,\cdot)}$. Thus the optimization problem can be written as follows:
 
 \begin{equation}
 \begin{aligned}
 & \underset{W}{\text{minimize}}
-& C(W) &= \sum\limits_{j=0}^{n}l(y_j,f_W(x_j)) \\
+& C(W) &= \sum\limits_{i=0}^{n}l(y_i,f_W(x_i)) \\
 \end{aligned}
 \label{op-eq}
 \end{equation}
@@ -86,7 +82,7 @@ In this thesis only regression problems will be considered, where $l(x,y)$ is th
 \begin{equation}
 \begin{aligned}
 & \underset{W}{\text{minimize}}
-& C(W) &= \sum\limits_{j=0}^{n}||y_j - f_W(x_j)||^2_2 \\
+& C(W) &= \sum\limits_{i=0}^{n}||y_i - f_W(x_i)||^2_2 \\
 \end{aligned}
 \label{op2-eq}
 \end{equation}
@@ -99,6 +95,8 @@ W_{k+1} = W_{k} - \eta_k\nabla F(W_k)
 
 where $\eta_k$ is the step size (a.k.a. "learning rate") and $\nabla F(W_k)$ is the gradient of the loss function at the $k$-th iterate.
 
+TODO: explain Stochastic Gradient Descent, variants such as ADAM, rmsProp
+
 \section{Neural network training as an optimal control problem}
 Neural network training can also be seen as an optimal control problem. A neural network is a multi-stage dynamical system, where every layer is a stage. The dynamics are ruled by the equations \ref{st-eq}. In optimal control the following objective cost function is considered:
 
@@ -107,19 +105,20 @@ E(\theta) = \sum\limits_{s=1}^{L-1}g^s(a^s,\theta^s) + h(a^L)
 \end{equation}
 
 
-$a^s$ and $\theta^s$ are the state and decision vectors at stage $s$, and $g^s$ and $h$ are the immediate cost at stage $s$ and the terminal cost, respectively. In neural network training the immediate costs are usually dropped. If the terminal cost is taken to be the MSE, the same cost function as in equation \ref{op2-eq} is found. The terminology and notation differences have been summarized in table \ref{trans-tbl}. Using neural network terminology the optimal control problem to be solved is the following:
+$a^s$ and $\theta^s$ are the state and decision vectors at stage $s$, and $g^s$ and $h$ are the stage cost at stage $s$ and the terminal cost, respectively. In neural network training the stage costs are usually dropped. If the terminal cost is taken to be the MSE, the same cost function as in equation \ref{op2-eq} is found. The terminology and notation differences have been summarized in table \ref{trans-tbl}. Using neural network terminology the optimal control problem to be solved is the following:
 
 \begin{equation}
 	\begin{aligned}
 	& \underset{W}{\text{minimize}}
-	& & \sum\limits_{j=0}^{n}||W_Lz_{L,j} - y_j||^2_2 \\
+	& & \sum\limits_{j=0}^{n}||\sigma_L(W_Lz_L) - y_j||^2_2 \\
 	& \text{subject to}
-	& & z_{0,j} = x_j \\
-	& & & z_{k+1,j} = \sigma(W_kz_{k,j} + b_k,0), &k = 0,\ldots,L-1,j = 1,\ldots,n
+	& & z_{1,j} = \sigma_0(W_0,x_j), &j = 1,\ldots,n \\
+	& & & z_{k+1,j} = \sigma_k(W_kz_{k,j}), &k = 1,\ldots,L-1,j = 1,\ldots,n
 	\end{aligned}
 	\label{ocp-eq}
 \end{equation}
 
+This notation actually constructs $j$ parallel dynamical systems with the same weights, but different inputs, outputs and states. The cost function then concatenates them all together \cite{dreyfus1990}.
 
 \begin{table}
 \centering
@@ -188,11 +187,26 @@ In this method the state variables in the non-linear program (NLP), equation \re
 The total number of variables that will be optimized for in a neural network is quite large. For a fully connected neural network of width $W$, depth $L$, there will be $\mathcal{O}(W^2L)$ weights to be optimized, a.k.a. decision variables in control theory. This is true for both BP and DMS. But for DMS, another $\mathcal{O}(WLN)$ state variables are added, with $N$ the number of training samples. In control theory the tradeoff for making the problem larger in this way is that the problem becomes less non-linear. In practice this often makes the NLP easier to solve, which is why DMS is a common choice. For neural networks this could let the algorithm get stuck in a "bad" local minimum less often.
 
 \section{Goal of the Thesis}
-The main goal of this thesis is to implement the direct shooting method for training neural networks, and compare it to the industry standard backpropagation algorithm. First an initial exploration of the method will be conducted in MATLAB. Then an Augmented Lagrangian Method (ALM) will be developed to solve the DMS problem more efficiently, which will be coded in python.
+The main goal of this thesis is to implement the multiple shooting method for training neural networks, and compare it to the industry standard backpropagation algorithm. First an initial exploration of the method will be conducted in MATLAB. Then an Augmented Lagrangian Method (ALM) will be developed to solve the MS problem more efficiently, which will be coded in python.
 
-The code will be compared to common gradient descent used in practice such as ADAM \cite{kingma2017adam}. They will be compared in terms of speed, scalability, reliability and performance for a number of test problems.
+The code will be compared to common Gradient Descent methods used in practice such as ADAM \cite{kingma2017adam}. They will be compared in terms of speed, scalability, reliability and performance for a number of test problems.
 
 In particular the objective will be to see if this algorithm can better handle known challenges for current training algorithms, such as the "vanishing/exploding gradient problem", or convergence to "bad local minima" (Goodfellow et al. \cite{Goodfellow-et-al-2016}, Sec. 8.2).
+
+\section{Structure of the Thesis}
+In chapter 2 the multiple shooting method will be investigated using MATLAB, and compared on some test problems against a gradient descent method.
+
+In chapter 3 an Augmented Lagrangian (AL) Method will be developed. The algorithm will be explained and a nonlinear least squares(LS) problem at the heart of the algorithm will be examined. The Jacobian matrix associated with the LS problem will be analytically derived and presented.
+
+In chapter 4 numerical tests will be applied to evaluate the performance of the AL method. It will be compared to the industry standard ADAM optimizer, which is a type of Gradient Descent method using backpropagation.
+
+Finally in chapter 5 the conclusions of the thesis and possible future work will be presented.
+
+Appendix A lists a collection of MATLAB code used in the thesis.
+
+Appendix B lists a collection of python code used in the thesis.
+
+The full source code can be downloaded from https://github.com/jan-scheers/thesis/.
 
 
 

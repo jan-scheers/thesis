@@ -126,8 +126,11 @@ class ALMModel:
         l = np.random.normal(0,1,self.nz)
         u = self.write()
         sigma_0,h_0 = 1,la.norm(self.h(u))
-        hist = {"tol":np.empty(0),"njev":np.empty(0),"loss":np.empty(0),'val_loss':np.empty(0)}
-        for k in range(10):
+        hist = {"loss":np.empty(0),"tol":np.empty(0),"njev":np.empty(0)}
+        if(val_data):
+            hist['val_loss'] = np.empty(0)
+
+        for k in range(12):
             beta_k = np.power(beta,k)
             eta_k = 1/beta_k
             fun = lambda u: self.L(u,beta_k,l)
@@ -162,11 +165,13 @@ class ALMModel:
                 # Convergence of val/test loss
                 y_val_pred = self.model(val_data[0])
                 val_loss = mse(y_val_pred,val_data[1]).numpy()
-                print("epoch: ",k+1,"DL: ",tol,"njev: ",sol.njev, "loss = ",loss,"val_loss = ",val_loss)
                 hist['val_loss'] = np.append(hist['val_loss'],val_loss)
+                print("epoch: ",k+1,"DL: ",tol,"njev: ",sol.njev, "loss = ",loss,"val_loss = ",val_loss)
+            else:
+                print("epoch: ",k+1,"DL: ",tol,"njev: ",sol.njev, "loss = ",loss)
 
-            if k>1 and ((1+tau)*hist['loss'][-1] > hist['loss'][-2]):
-                break
+#            if k>1 and ((1+tau)*hist['loss'][-1] > hist['loss'][-2]):
+#                break
         return hist
             
             

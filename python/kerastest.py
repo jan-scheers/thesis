@@ -6,7 +6,7 @@ from tensorflow import keras
 import alm
 from matplotlib import pyplot
 
-I,O,W,D,N, = 2,1,3,2,21
+I,O,W,D,N, = 2,2,3,2,7
 mu = 10
 
 shape = (W,D,I,O)
@@ -43,6 +43,7 @@ model.add(alm.Dense_d(activation_=tau_,units=O,activation=tau))
 n2 = alm.ALMModel(model, x.transpose(), y.transpose())
 model.summary()
 
+
 g = np.arange(W)+1
 a = g*(I+1)
 b = a[2] + g*(W+1)
@@ -51,30 +52,37 @@ c = b[2] + W+1
 g = np.r_[a,b,c]-1
 h = np.arange(n_u-D*W*N,n_u)
 
-mask = np.ones((n_u,),bool)
+#mask = np.ones((n_u,),bool)
 
-mask[g] = 0
-mask[h] = 0
+#mask[g] = 0
+#mask[h] = 0
 
-k = np.arange(n_u)
+#k = np.arange(n_u)
 t = np.arange(n_u)
-t[mask] = k[0:h[0]-D*W-O]
-t[g] = k[h[0]-D*W-O:h[0]]
-t[h] = k[h]
+#t[mask] = k[0:h[0]-D*W-O]
+#t[g] = k[h[0]-D*W-O:h[0]]
+#t[h] = k[h]
 
 L2 = n2.L(u[t], mu, l)
 J2 = n2.JL(u[t], mu).toarray()
 
 Jnz = J2 != 0
 
-J2 = np.c_[J2[:,mask],J2[:,g],J2[:,h]]
+#J2 = np.c_[J2[:,mask],J2[:,g],J2[:,h]]
 
-print(np.allclose(L,np.ravel(L_U.data[0,0])))
-print(np.allclose(L,L2))
-print(np.allclose(J,J_U))
-print(np.allclose(J,J2))
+#print(np.allclose(L,np.ravel(L_U.data[0,0])))
+#print(np.allclose(L,L2))
+#print(np.allclose(J,J_U))
+#print(np.allclose(J,J2))
+
+#Jnz = J != 0
+
+Jnz2 = np.r_[Jnz[-O*N:,:],Jnz[:-O*N,:]]
 
 np.set_printoptions(precision=3,linewidth=200)
+pyplot.figure()
 pyplot.matshow(Jnz,cmap="binary")
+pyplot.figure()
+pyplot.matshow(Jnz2,cmap="binary")
 pyplot.show()
 
