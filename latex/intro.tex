@@ -1,25 +1,56 @@
 \chapter{Introduction}
 \section{Artificial Neural Networks}
 
-Artifical Neural Networks (ANNs) are a very popular machine learning model. They are known to be very expressive, leading to low statistical bias[REF]. With enough neurons, ANNs can approximate any function[REF].  They are especially useful for learning from very large data sets. But it is not entirely clear what the optimization of an ANN converges to, as the loss surface is highly non-convex[REF]. Nonetheless a number of results show that for wide enough networks, there are few "bad" local minima[REF].
+Artifical Neural Networks (ANNs) are a very popular machine learning model. They are known to be very expressive, leading to low statistical bias. With enough neurons, ANNs can approximate any function, also known as the Universal Approximation Theorem\cite{cybenko1989}.  They are especially useful for learning from very large data sets.
 
 ANNs are composed of 'neurons', which are in some ways analogous to biological neurons.Each neuron is a nonlinear function transforming the weighted sum of its inputs and a bias:
 \begin{equation}
       y = \sigma(w_1x_1+w_2x_2+...+w_nx_n + b)
 \end{equation}
 
-where $w$ are the weights, $x$ are the inputs to the neuron, which come either from a previous neuron, or are fed into the network, $\sigma$ is the activation function, and finally a bias $b$ is also added to the sum. This is the McCulloch-Pitts neuron model[REF]. The most commonly used activation function $\sigma$ is the Rectified Linear Unit (ReLU):
+where $w$ are the weights, $x$ are the inputs to the neuron, which come either from a previous neuron, or are fed into the network, $\sigma$ is the activation function, and finally a bias $b$ is also added to the sum. This is the McCulloch-Pitts neuron model\cite{McCulloch1990}. The most commonly used activation function $\sigma$ is the Rectified Linear Unit (ReLU):
 
 \begin{equation}
       \sigma(x) = x^+ = \max(0,x)
 \end{equation}
 
-Many other activation functions are possible, such as the sigmoid function ($\frac{1}{1+e^{-x}}$) or the hyperbolic tangent function ($\tanh(x)$). TODO: explain properties, show plot
-
-A visual representation is shown in figure \ref{neural:neur}. A full network is built by connecting layers of neurons as shown in figure \ref{neural:net}.
+Many other activation functions are possible, such as the sigmoid function ($\frac{1}{1+e^{-x}}$) or the hyperbolic tangent function ($\tanh(x)$). Figure \ref{sigmafig} plots the ReLU and $\tanh$ activation functions which are used in this thesis. Table \ref{sigprop} lists some properties of these functions. Particularly of interest is the fact that ReLU is not smooth everywhere, in $x=0$ the derivative is undefined \cite{wikiact}. In the code of this thesis it is taken to be $0$.
 
 
+\begin{table}
+\centering
+\begin{tabular}{ c | c c c c}
+Name & Function & Derivative & Range & Order of Continuity \\ \hline
+ReLU & $\max(0,x)$ & $ 
+     \begin{cases}
+       0 &\text{if} \quad x \leq 0\\
+       1 &\text{if} \quad x > 0 \\
+     \end{cases}$ & $[0,\infty)$ & $C^0$ \\
+Hyperbolic Tangent & $\tanh(x)$ & $\frac{2}{\cosh(2x)+1}$ & $(-1,1)$ & $C^{\infty}$
+\end{tabular}
+\caption{Properties of activation functions}
+\label{sigprop}
+\end{table}
 
+\begin{figure}
+	\centering
+	\begin{subfigure}[b]{.49\textwidth}
+		\includegraphics[width=\textwidth]{tanh}
+		\caption{Hyperbolic tangent: $y = \tanh(x)$}
+		\label{figtanh}
+	\end{subfigure}
+	%\caption{Feedforward Deep Neural Network. \cite}
+	\begin{subfigure}[b]{.49\textwidth}
+		\includegraphics[width=\textwidth]{relu}
+		\caption{ReLU: $y = x^+ = \max(x,0)$}
+		\label{figrelu}
+	\end{subfigure}
+	\caption{Plot of two common activation functions}
+	\label{sigmafig}
+\end{figure}
+
+
+A visual representation of a network is shown in figure \ref{neural:neur}. A full network is built by connecting layers of neurons as shown in figure \ref{neural:net}.
 
 \begin{figure}[b]
 	\centering
@@ -38,10 +69,29 @@ A visual representation is shown in figure \ref{neural:neur}. A full network is 
 	\label{neural}
 \end{figure}
 
-\newpage
-
 \section{Neural Network Training}
-Training a neural network is an optimization problem as we will discuss in this section. Ruoyu Sun covers in \cite{sun2019optimization} the current theory and algorithms for optimizing deep neural networks, upon which much of this section is based.
+Training a neural network is an optimization problem as we will discuss in this section. However the theoretical understanding of ANN optimization is still quite limited. Quoting from \cite{jacot2020neural}: "... it is not known what the optimization of ANNs converges to. Indeed the loss surface of neural networks optimization problems is highly non-convex: it has a high number of saddle points which may slow down the convergence \cite{DauphinYann2014Iaat}". 
+
+ANN training is a highly nonlinear problem, where most optimization algorithms can only arrive at a local minimum. The complexity of the loss surface means there can be a very large amount of local minima, which is an issue if these minima have a high cost compared to the global minimum, also known as the problem of "bad" local minima \cite{Goodfellow-et-al-2016}. This concept is difficult to define formally as finding the global minimum of a network is an intractible problem for practical networks. The problem of "bad" local minima was long feared to be a practical hurdle to good network training, but theoretical results \cite{ChoromanskaAnna2015Tlso},\cite{SaxeAndrewM2013Estt} suggest that this is uncommon for large neural networks. Many experts believe that for large networks, in practice, local minima have a low cost function, comparable to the global minimum \cite{Goodfellow-et-al-2016}. An interesting visualisation of the loss surface can be found in \cite{li2018visualizing}, figure \ref{surfvis} presents two graphics from this paper. The 3rd dimension represents the loss function, while the first two represent training parameters. It shows the non-convexity of the loss surface.
+
+\begin{figure}
+	\centering
+	\begin{subfigure}[b]{.49\textwidth}
+		\includegraphics[width=\textwidth]{surface1}
+		\caption{ResNet-56}
+		\label{surf1}
+	\end{subfigure}
+	%\caption{Feedforward Deep Neural Network. \cite}
+	\begin{subfigure}[b]{.49\textwidth}
+		\includegraphics[width=\textwidth]{surface2}
+		\caption{ResNet-110}
+		\label{Surf2}
+	\end{subfigure}
+	\caption{Visualisation example of loss surface of neural network. Retrieved from \cite{li2018visualizing}.}
+	\label{surfvis}
+\end{figure}
+
+Ruoyu Sun covers in \cite{sun2019optimization} the current theory and algorithms for optimizing deep neural networks, upon which much of this section is based.
 
 In a supervised learning problem a dataset of inputs and desired outputs is given: $x_i \in \mathbb{R}^{d_x}, y_j \in \mathbb{R}^{d_y}, i = 1,\dots,n$ with $x_i$ the input vectors, $y_i$ the desired output vectors and $n$ the number of data points. We want the network to predict the output $y_i$ based on the information in $x_i$, i.e. we want the network to learn the underlying mapping that connects the data. A standard fully connected network can be expressed as a combination of function composition and matrix multiplication as follows:
 
@@ -95,7 +145,13 @@ W_{k+1} = W_{k} - \eta_k\nabla F(W_k)
 
 where $\eta_k$ is the step size (a.k.a. "learning rate") and $\nabla F(W_k)$ is the gradient of the loss function at the $k$-th iterate.
 
-TODO: explain Stochastic Gradient Descent, variants such as ADAM, rmsProp
+In practice the datasets that are used in training can be large to very large, i.e. "Big Data". In these cases it is infeasible to calculate the gradient over all samples. Instead what is done is to calculate an approximation of the gradient over a small number of samples called a "mini-batch".
+
+\begin{equation}
+W_{k+1} = W_{k} - \eta_k\nabla^i F(W_k)
+\label{gd-eq}
+\end{equation}
+where $\nabla^i F(W_k)$ is the gradient calculated with respect to the samples in the "mini-batch". In each epoch a different set of samples is selected. This is the Stochastic Gradient Descent method. In general this method will converge to the same solution \cite{Bottou2005}. This algorithm can be improved even further by using an adaptive learning rate $\eta_k$, such as RMSProp or ADAM, which are currently the most popular algorithms. The choice of which algorithm to use is largely based on the user's familiarity with the algorithm and its hyperparameters \cite{Goodfellow-et-al-2016}.
 
 \section{Neural network training as an optimal control problem}
 Neural network training can also be seen as an optimal control problem. A neural network is a multi-stage dynamical system, where every layer is a stage. The dynamics are ruled by the equations \ref{st-eq}. In optimal control the following objective cost function is considered:
@@ -134,9 +190,9 @@ $a$ & state variables & (neuron) activation & $z$\\
 
 
 \section{Backpropagation}
-The current standard algorithm for training a neural network is backpropagation (BP). It works by efficiently calculating the gradient for GD (equation \ref{gd-eq}). It was discovered and popularised in the context of neural networks by Rumelhart, Hinton \& Williams (1986) \cite{Rumelhart1986}. But it has been shown that by viewing the problem in an optimal control context, the backpropagation algorithm is the same as the gradient formulas discovered by Kelley and Bryson in 1960 \cite{dreyfus1990}.
+The current standard algorithm for training a neural network is backpropagation (BP). It works by efficiently calculating the gradient for GD (equation \ref{gd-eq}). It was discovered and popularised in the context of neural networks by Rumelhart, Hinton \& Williams (1986) \cite{Rumelhart1986}. But it has been shown that by viewing the problem in an optimal control context, the backpropagation algorithm is the same as the gradient formulas discovered by Kelley and Bryson in 1960 \cite{dreyfus1990},\cite{kelley1960},\cite{Bryson1962}.
 
-This section will explain how backpropagation works, it will largely follow and summarize \cite{Nielsen2015}. Essentially BP evaluates the derivative of the cost function from the end to the front of the network, i.e. "backwards". It works on each input-output pair individually, with the full gradient given by the averaging over all pairs.
+This section will explain how backpropagation works, it will largely follow and summarize \cite{Nielsen2015},\cite{wikiback}. Essentially BP evaluates the derivative of the cost function from the end to the front of the network, i.e. "backwards". It works on each input-output pair individually, with the full gradient given by averaging over all pairs.
 
 Given an input-output pair $(x,y)$, the loss is:
 \begin{equation}
@@ -186,12 +242,19 @@ In this method the state variables in the non-linear program (NLP), equation \re
 
 The total number of variables that will be optimized for in a neural network is quite large. For a fully connected neural network of width $W$, depth $L$, there will be $\mathcal{O}(W^2L)$ weights to be optimized, a.k.a. decision variables in control theory. This is true for both BP and DMS. But for DMS, another $\mathcal{O}(WLN)$ state variables are added, with $N$ the number of training samples. In control theory the tradeoff for making the problem larger in this way is that the problem becomes less non-linear. In practice this often makes the NLP easier to solve, which is why DMS is a common choice. For neural networks this could let the algorithm get stuck in a "bad" local minimum less often.
 
+\section{Related Work}
+The concept of viewing neural network training in light of control theory has been examined previously \cite{dreyfus1990}, \cite{mizutani2000}. However these papers do not attempt to propose an alternative to backpropagation, rather they reformulate backpropagation in control theory terms and propose modest improvements.
+
+More recently \cite{evens2021neural} details a very similar approach which was developed in parallel to this thesis. In this paper a different Augmented Lagrangian framework is selected, and the inner problem is solved using a Gauss-Newton approach, while this thesis uses a Trust Region Reflective method. The results show similar trends as the ones in this thesis, but the tests in \cite{evens2021neural} were limited to problems with small datasets (up to 15 datapoints).
+
 \section{Goal of the Thesis}
 The main goal of this thesis is to implement the multiple shooting method for training neural networks, and compare it to the industry standard backpropagation algorithm. First an initial exploration of the method will be conducted in MATLAB. Then an Augmented Lagrangian Method (ALM) will be developed to solve the MS problem more efficiently, which will be coded in python.
 
 The code will be compared to common Gradient Descent methods used in practice such as ADAM \cite{kingma2017adam}. They will be compared in terms of speed, scalability, reliability and performance for a number of test problems.
 
 In particular the objective will be to see if this algorithm can better handle known challenges for current training algorithms, such as the "vanishing/exploding gradient problem", or convergence to "bad local minima" (Goodfellow et al. \cite{Goodfellow-et-al-2016}, Sec. 8.2).
+
+\newpage
 
 \section{Structure of the Thesis}
 In chapter 2 the multiple shooting method will be investigated using MATLAB, and compared on some test problems against a gradient descent method.

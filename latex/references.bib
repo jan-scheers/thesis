@@ -19,6 +19,7 @@
   title =        {Thesis or dissertation},
   howpublished = {URL: \url{http://en.wikipedia.org/wiki/Thesis_or_dissertation},
                   last checked on 2010-01-07}}
+
 @misc{sun2019optimization,
       title={Optimization for deep learning: theory and algorithms}, 
       author={Ruoyu Sun},
@@ -46,7 +47,8 @@ URL = {
 eprint = {
         https://doi.org/10.2514/3.25422
 
-}
+}}
+
 
 @book{Rall1981,
 series = {Lecture notes in computer science 120},
@@ -66,7 +68,7 @@ author="Birgin, Ernesto G.
 and Mart{\'i}nez, J. M.",
 editor="Floudas, Christodoulos A.
 and Pardalos, Panos M.",
-title="Practical augmented Lagrangian methodsPractical Augmented Lagrangian Methods",
+title="Practical Augmented Lagrangian Methods",
 bookTitle="Encyclopedia of Optimization",
 year="2009",
 publisher="Springer US",
@@ -237,9 +239,9 @@ author = {Bertsekas, Dimitri P},
 }
 
 @misc{scipyls,
+    author={scipy}
     title={scipy.optimize.least\_squares},
     howpublished={URL: \url{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.least_squares.html}, retrieved 2021-05-31}
-    author={scipy community}
 }
 
 @article{Lu2020,
@@ -258,8 +260,262 @@ author = {Bertsekas, Dimitri P},
 }
 
 
-@Misc{dertat2017,
-  author =       {kipedia},
-  title =        {Thesis or dissertation},
-  howpublished = {URL: \url{http://en.wikipedia.org/wiki/Thesis_or_dissertation},
-                  last checked on 2010-01-07}}
+@article{cybenko1989,
+  title={Approximation by superpositions of a sigmoidal function},
+  author={Cybenko, George},
+  journal={Mathematics of control, signals and systems},
+  volume={2},
+  number={4},
+  pages={303--314},
+  year={1989},
+  publisher={Springer}
+}
+
+@article{DauphinYann2014Iaat,
+abstract = {A central challenge to many fields of science and engineering involves
+minimizing non-convex error functions over continuous, high dimensional spaces.
+Gradient descent or quasi-Newton methods are almost ubiquitously used to
+perform such minimizations, and it is often thought that a main source of
+difficulty for these local methods to find the global minimum is the
+proliferation of local minima with much higher error than the global minimum.
+Here we argue, based on results from statistical physics, random matrix theory,
+neural network theory, and empirical evidence, that a deeper and more profound
+difficulty originates from the proliferation of saddle points, not local
+minima, especially in high dimensional problems of practical interest. Such
+saddle points are surrounded by high error plateaus that can dramatically slow
+down learning, and give the illusory impression of the existence of a local
+minimum. Motivated by these arguments, we propose a new approach to
+second-order optimization, the saddle-free Newton method, that can rapidly
+escape high dimensional saddle points, unlike gradient descent and quasi-Newton
+methods. We apply this algorithm to deep or recurrent neural network training,
+and provide numerical evidence for its superior optimization performance.},
+year = {2014},
+title = {Identifying and attacking the saddle point problem in high-dimensional non-convex optimization},
+copyright = {http://arxiv.org/licenses/nonexclusive-distrib/1.0},
+language = {eng},
+author = {Dauphin, Yann and Pascanu, Razvan and Gulcehre, Caglar and Cho, Kyunghyun and Ganguli, Surya and Bengio, Yoshua},
+}
+
+@article{ChoromanskaAnna2015Tlso,
+issn = {1532-4435},
+journal = {Journal of machine learning research},
+pages = {192--204},
+volume = {38},
+year = {2015},
+title = {The loss surfaces of multilayer networks},
+copyright = {Copyright 2016 Elsevier B.V., All rights reserved.},
+language = {eng},
+author = {Choromanska, Anna and Henaff, Mikael and Mathieu, Michael and Arous, Gérard Ben and LeCun, Yann},
+}
+
+@article{SaxeAndrewM2013Estt,
+abstract = {Despite the widespread practical success of deep learning methods, our
+theoretical understanding of the dynamics of learning in deep neural networks
+remains quite sparse. We attempt to bridge the gap between the theory and
+practice of deep learning by systematically analyzing learning dynamics for the
+restricted case of deep linear neural networks. Despite the linearity of their
+input-output map, such networks have nonlinear gradient descent dynamics on
+weights that change with the addition of each new hidden layer. We show that
+deep linear networks exhibit nonlinear learning phenomena similar to those seen
+in simulations of nonlinear networks, including long plateaus followed by rapid
+transitions to lower error solutions, and faster convergence from greedy
+unsupervised pretraining initial conditions than from random initial
+conditions. We provide an analytical description of these phenomena by finding
+new exact solutions to the nonlinear dynamics of deep learning. Our theoretical
+analysis also reveals the surprising finding that as the depth of a network
+approaches infinity, learning speed can nevertheless remain finite: for a
+special class of initial conditions on the weights, very deep networks incur
+only a finite, depth independent, delay in learning speed relative to shallow
+networks. We show that, under certain conditions on the training data,
+unsupervised pretraining can find this special class of initial conditions,
+while scaled random Gaussian initializations cannot. We further exhibit a new
+class of random orthogonal initial conditions on weights that, like
+unsupervised pre-training, enjoys depth independent learning times. We further
+show that these initial conditions also lead to faithful propagation of
+gradients even in deep nonlinear networks, as long as they operate in a special
+regime known as the edge of chaos.},
+year = {2013},
+title = {Exact solutions to the nonlinear dynamics of learning in deep linear neural networks},
+copyright = {http://arxiv.org/licenses/nonexclusive-distrib/1.0},
+language = {eng},
+author = {Saxe, Andrew M and McClelland, James L and Ganguli, Surya},
+}
+
+@misc{li2018visualizing,
+      title={Visualizing the Loss Landscape of Neural Nets},
+      author={Hao Li and Zheng Xu and Gavin Taylor and Christoph Studer and Tom Goldstein},
+      year={2018},
+      eprint={1712.09913},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+
+@article{McCulloch1990,
+issn = {0092-8240},
+abstract = {Because of the “all-or-none” character of nervous activity, neural events and the relations among them can be treated by means of propositional logic. It is found that the behavior of every net can be described in these terms, with the addition of more complicated logical means for nets containing circles; and that for any logical expression satisfying certain conditions, one can find a net behaving in the fashion it describes. It is shown that many particular choices among possible neurophysiological assumptions are equivalent, in the sense that for every net behaving under one assumption, there exists another net which behaves under the other and gives the same results, although perhaps not in the same time. Various applications of the calculus are discussed.},
+journal = {Bulletin of mathematical biology},
+pages = {99--115},
+volume = {52},
+publisher = {Elsevier Ltd},
+number = {1},
+year = {1990},
+title = {A logical calculus of the ideas immanent in nervous activity},
+copyright = {1990 Society for Mathematical Biology.},
+language = {eng},
+address = {NEW YORK},
+author = {McCulloch, Warren S and Pitts, Walter},
+}
+
+@Misc{wikiact,
+  author =       {Wikipedia},
+  title =        {Activation Function},
+  howpublished = {URL: \url{http://en.wikipedia.org/wiki/Activation_Function},
+                  last checked on 2021-06-03}}
+}
+
+@Misc{wikiback,
+  author =       {Wikipedia},
+  title =        {Backpropagation},
+  howpublished = {URL: \url{http://en.wikipedia.org/wiki/Backpropagation},
+                  last checked on 2021-06-03}}
+}
+@Misc{wikiad,
+  author =       {Wikipedia},
+  title =        {Automatic Differentiation},
+  howpublished = {URL: \url{https://en.wikipedia.org/wiki/Automatic_differentiation},
+                  last checked on 2021-06-03}}
+}
+@Misc{yalmip,
+  author =       {YALMIP},
+  title =        {YALMIP},
+  howpublished = {URL: \url{https://yalmip.github.io/},
+                  last checked on 2021-06-03}}
+}
+@Misc{matlab,
+  author =       {MathWorks},
+  title =        {MATLAB},
+  howpublished = {URL: \url{https://nl.mathworks.com/products/matlab.html},
+                  last checked on 2021-06-03}}
+}
+@Misc{nntoolbox,
+  author =       {MathWorks},
+  title =        {nntoolbox},
+  howpublished = {URL: \url{https://nl.mathworks.com/products/deep-learning.html},
+                  last checked on 2021-06-03}}
+}
+@misc{fmincon,
+    author = {MathWorks},
+    title = {fmincon},
+    howpublished = {URL: \url{https://nl.mathworks.com/help/optim/ug/fmincon.html},
+                  last checked on 2021-06-03}}
+}
+@misc{numpy,
+    author = {numpy},
+    title = {numpy},
+    howpublished = {URL: \url{https://numpy.org/},
+                  last checked on 2021-06-03}}
+}
+@misc{scipy,
+    author = {scipy},
+    title = {scipy},
+    howpublished = {URL: \url{https://scipy.org/},
+                  last checked on 2021-06-03}}
+}
+@misc{tensorflow,
+    author = {tensorflow},
+    title = {tensorflow},
+    howpublished = {URL: \url{https://www.tensorflow.org/},
+                  last checked on 2021-06-03}}
+}
+@misc{algopy,
+    author = {AlgoPy},
+    title = {AlgoPy},
+    howpublished = {URL: \url{https://pythonhosted.org/algopy/},
+                  last checked on 2021-06-03}}
+}
+@misc{adam,
+    author = {Tensorflow},
+    title = {adam},
+    howpublished = {URL: \url{https://keras.io/api/optimizers/adam/},
+                  last checked on 2021-06-03}}
+}
+
+
+@article{Bottou2005,
+issn = {8755-0024},
+abstract = {The design of very large learning systems presents many unsolved challenges. Consider, for instance, a system that ‘watches’ television for a few weeks and learns to enumerate the objects present in these images. Most current learning algorithms do not scale well enough to handle such massive quantities of data. Experience suggests that the stochastic learning algorithms are best suited to such tasks. This is at first surprising because stochastic learning algorithms optimize the training error rather slowly. Our paper reconsiders the convergence speed in terms of how fast a learning algorithm optimizes the testing error. This reformulation shows the superiority of the well designed stochastic learning algorithm.},
+journal = {Applied Stochastic Models in Business and Industry},
+pages = {137--151},
+volume = {15},
+publisher = {John Wiley \& Sons, Ltd},
+number = {1},
+year = {2005},
+title = {On-line learning for very large data sets},
+language = {eng},
+address = {Chichester, UK},
+author = {Bottou, Léon and Le Cun, Yann},
+}
+
+@misc{evens2021neural,
+      title={Neural Network Training as an Optimal Control Problem: An Augmented Lagrangian Approach},
+      author={Brecht Evens and Puya Latafat and Andreas Themelis and Johan Suykens and Panagiotis Patrinos},
+      year={2021},
+      eprint={2103.14343},
+      archivePrefix={arXiv},
+      primaryClass={math.OC}
+}
+
+@book{weigend2018time,
+  title={Time series prediction: forecasting the future and understanding the past},
+  author={Weigend, Andreas S},
+  year={2018},
+  publisher={Routledge}
+}
+
+@misc{suykens2020,
+  author        = {Johan Suykens},
+  title         = {Data Mining and Neural Networks},
+  year          = {2020},
+  publisher     = {KU Leuven}
+  howpublished = {URL: \url{https://onderwijsaanbod.kuleuven.be//2019/syllabi/e/H03V7BE.htm#activetab=doelstellingen_idp1513488},}
+}
+
+@article{kelley1960,
+author = {KELLEY, HENRY J.},
+title = {Gradient Theory of Optimal Flight Paths},
+journal = {ARS Journal},
+volume = {30},
+number = {10},
+pages = {947-954},
+year = {1960},
+doi = {10.2514/8.5282},
+
+URL = {
+        https://doi.org/10.2514/8.5282
+
+},
+eprint = {
+        https://doi.org/10.2514/8.5282
+
+}
+
+}
+
+@Article{Bryson1962,
+author={Bryson, A. E.
+and Denham, W. F.},
+title={A Steepest-Ascent Method for Solving Optimum Programming Problems},
+journal={Journal of Applied Mechanics},
+year={1962},
+month={Jun},
+day={01},
+volume={29},
+number={2},
+pages={247-257},
+abstract={A systematic and rapid steepest-ascent numerical procedure is described for solving two-point boundary-value problems in the calculus of variations for systems governed by a set of nonlinear ordinary differential equations. Numerical examples are presented for minimum time-to-climb and maximum altitude paths for a supersonic interceptor and maximum-range paths for an orbital glider.},
+issn={0021-8936},
+doi={10.1115/1.3640537},
+url={https://doi.org/10.1115/1.3640537}
+}
+
+

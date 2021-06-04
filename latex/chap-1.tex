@@ -25,14 +25,14 @@ This is a nonlinear program with nonlinear equality constraints. It is possible 
 	\end{aligned}
 \end{equation}
 
-where $f_W$ is the neural network as a function as in \ref{nnfnc}. Solving this problem would be the single shooting approach. One can find the gradient of this function using dynamic programming techniques, leading again to the backpropagation algorithm. A full derivation of the backpropagation algorithm using control theory can be found in Mizutani et al. \cite{mizutani2000} and Dreyfus et al. \cite{dreyfus1990}
+where $f_W$ is the neural network as a function as in equation \ref{funeq}. Solving this problem would be the single shooting approach. One can find the gradient of this function using dynamic programming techniques, leading again to the backpropagation algorithm. A full derivation of the backpropagation algorithm using control theory can be found in Mizutani et al. \cite{mizutani2000} and Dreyfus et al. \cite{dreyfus1990}.
 
-This thesis instead tries to solve equation \label{ocp-eq2} directly, which corresponds to a multiple shooting approach.
+This thesis instead tries to solve equation \ref{ocp-eq2} directly, which corresponds to a multiple shooting approach.
 
 \section{Test setup}
-Before writing a custom solver, the problem is explored using a general nonlinear program(NLP) solver. For this task the \texttt{fmincon} method implemented in MATLAB is used together with the YALMIP optimization library. This method implements a interior point algorithm for solving constrained NLPs. 
+Before writing a custom solver, the problem is explored using a general nonlinear program(NLP) solver. For this task the \texttt{fmincon} method implemented in MATLAB is used together with the YALMIP optimization library \cite{fmincon},\cite{matlab},\cite{yalmip}. This method implements a interior point algorithm for solving constrained NLPs. 
 
-For comparison against the standard backpropagation the neural network toolbox of MATLAB is used. The default training algorithm in this toolbox is \texttt{trainlm} which implements a Levenberg-Marquardt backpropagation algorithm. However this method is too well suited for the simple curve fitting problem the next sections use for testing. As figure \ref{trainlm} shows, this algorithm finds a perfect fitting curve almost every time. For this reason \texttt{traingd} is used instead, which is a standard Gradient Descent(GD) backpropagation algorithm. GD based algorithms such as ADAM are some of the most used algorithms in practice because of their simplicity and low cost per epoch.[REF] In contrast to \texttt{trainlm} this method will often settle in a "bad" local minimum and will not reach the same performance.
+For comparison against the standard backpropagation the neural network toolbox of MATLAB is used \cite{nntoolbox}. The default training algorithm in this toolbox is \texttt{trainlm} which implements a Levenberg-Marquardt backpropagation algorithm. However this method is too well suited for the simple curve fitting problem the next sections use for testing. As figure \ref{trainlm} shows, this algorithm finds a perfect fitting curve almost every time. For this reason \texttt{traingd} is used instead, which is a standard Gradient Descent(GD) backpropagation algorithm. GD based algorithms such as ADAM are some of the most used algorithms in practice because of their simplicity and low cost per epoch \cite{Goodfellow-et-al-2016}. In contrast to \texttt{trainlm} this method will often settle in a "bad" local minimum and will not reach the same performance.
 
 The test case used in this chapter is a regression problem to fit a neural network to the following sine function:
 
@@ -43,7 +43,7 @@ y_j = -.8\sin(x_j) + \mathcal N(0,\delta), x \in [0,1], j = 1..N
 
 where $\delta=0.1$ adds noise, and $N$ is the number of datapoints. The input-output pairs $(x_j,y_j)$ are split into a training set of size $\frac{4}{5}N$ and a test set of size $\frac{1}{5}N$. Figure \ref{trainlm} plots this function and shows the output of a network which has been fit using \texttt{trainlm}. This is also a clear example of overfitting.
 
-This test problem, as well as the test problem used in chapter 3, \ref{}, come from the course on neural networks given at KU Leuven \cite{}. [version numbers, hardware specs]
+This test problem, as well as the test problems used in chapter 3, come from the course on neural networks given at KU Leuven \cite{suykens2020}. The tests use MATLAB R2018a, YALMIP v20190425. They are run on an Intel(R) Core(TM) i5-7300HQ CPU @ 2.50GHz with 8Gi RAM and SSD hard disk. 
 
 \begin{figure}
 	\centering
@@ -102,7 +102,7 @@ To quantify the difference in performance, each algorithm is run for 20 training
 	\label{tab:tanh}
 \end{table}
 
-Using \texttt{fmincon}, MS only converges 6 out of 20 times, while GD always converges. GD also has much better average performance and runs much quicker. However, at its best, MS can at least show similar performance to GD. The GD algorithm runs on GPU while the MS algorithm runs on CPU, so faster runs should be expected.
+Using \texttt{fmincon}, MS only converges 6 out of 20 times, while GD always converges. GD also has much better average performance and runs much quicker. However, at its best, MS can at least show similar performance to GD. The GD algorithm runs on GPU while the MS algorithm runs on CPU, which partly explains the difference in speed.
 
 \section{Rectified linear unit}
 In this section the same experiment as last time is run, but with a different network architecture. Again a network of two layers is used, but with 8 neurons in each layer, and using a ReLU activation function. 
@@ -137,7 +137,7 @@ Table \ref{tab:relu} shows the results after 20 training runs, under the same co
 
 
 \section{Conclusion}
-The MS algorithm did not outperform the GD in any way in either of the tests. However this chapter has demonstrated that it is feasible to train a network in this manner. Good solutions are possible using this method. The main issue is that \texttt{fmincon} is a very general method, and not well suited to this specific problem. For this reason the next chapter will explore the Augmented Langrangian Method (ALM), a common algorithmic framework for solving constrained NLPs.
+The MS algorithm did not outperform the GD in any way in either of the tests. However this chapter has demonstrated that it is feasible to train a network in this manner. Good solutions are possible using this method. The main issue is that \texttt{fmincon} is a very general NL solver, and not well suited to this specific problem. For this reason the next chapter will explore the Augmented Langrangian Method (ALM), a common algorithmic framework for solving constrained NLPs.
 
 
 

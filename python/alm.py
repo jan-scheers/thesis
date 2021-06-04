@@ -170,8 +170,8 @@ class ALMModel:
             else:
                 print("epoch: ",k+1,"DL: ",tol,"njev: ",sol.njev, "loss = ",loss)
 
-#            if k>1 and ((1+tau)*hist['loss'][-1] > hist['loss'][-2]):
-#                break
+            if k>1 and ((1+tau)*hist['loss'][-1] > hist['loss'][-2]):
+                break
         return hist
             
             

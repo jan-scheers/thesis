@@ -1,4 +1,3 @@
-import net
 import time
 from algopy import UTPM
 import tensorflow as tf

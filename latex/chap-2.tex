@@ -1,9 +1,9 @@
 \chapter{Augmented Lagrangian Method}
 \label{cha:2}
-In this chapter the direct multiple shooting approach is examined more closely and a more specific algorithm is designed to replace \texttt{fmincon}, which is a very general method. For this problem the Augmented Lagrangian Method has been chosen. This is a common method for solving constrained Non Linear Programs (NLPs). Instead of using the classical method, an Augmented Lagrangian framework is adapted from a recent paper\cite{sahin2019}.It will be implemented in python using \texttt{numpy},\texttt{scipy}, and \texttt{keras}.
+In this chapter the direct multiple shooting approach is examined more closely and a more specific algorithm is designed to replace \texttt{fmincon}, which is a very general method. For this problem the Augmented Lagrangian Method has been chosen. This is a common method for solving constrained Non Linear Programs (NLPs). Instead of using the classical method, an Augmented Lagrangian framework is adapted from a recent paper\cite{sahin2019}.It will be implemented in python using \texttt{numpy} v1.20.2, \texttt{scipy} v1.6.3  and \texttt{tensorflow} v2.5.0 \cite{numpy},\cite{scipy},\cite{tensorflow}.
 
 \section{Classical Augmented Lagrangian Method}
-The Augmented Lagrangian Method (ALM) is a classical algorithmic framework for solving constrained NLPs. It was first discovered in 1969 \cite{Hestenes1969},\cite{Powell1969} and was known as the method of multipliers. The textbook examples of this method can be found in \cite{Birgin2009} and \cite{bertsekas2014constrained}.
+The Augmented Lagrangian Method (ALM) is a classical algorithmic framework for solving constrained NLPs. It was first discovered in 1969 \cite{Hestenes1969},\cite{Powell1969} and was known as the method of multipliers. Textbook examples of this method can be found in \cite{Birgin2009} and \cite{bertsekas2014constrained}.
 
 It is designed to minimize equality constrained optimization problems defined in the following way:
 
@@ -97,7 +97,7 @@ Instead of using the textbook algorithm, an algorithmic framework from a more re
  \caption{Inexact Augmented Lagrangian Method}
  \label{algo}
 \end{algorithm}
-The penalty parameter increases geometrically, $\beta_k = \beta_0^k$, and the tolerence decreases geometrically $\eta_k = 1/\beta_k$. It is called the inexact Augmented Lagrangian Method (iALM) because the optimizer $u^*$ of subproblem \ref{loss} can only be found to an approximate solution.  The choice of dual step size $\sigma_k$ is to ensure the boundedness of the dual variables $\lambda_k$ \cite{sahin2019},\cite{bertsekas1976}. 
+The penalty parameter increases geometrically, $\beta_k = \beta_0^k$, and the tolerence decreases geometrically $\eta_k = 1/\beta_k$. It is called the inexact Augmented Lagrangian Method (iALM) because the optimizer $u^*$ of subproblem \ref{loss} can only be solved to an approximate solution.  The choice of dual step size $\sigma_k$ is to ensure the boundedness of the dual variables $\lambda_k$ \cite{sahin2019},\cite{bertsekas1976}. 
 
 
 Figure \ref{nabla} shows the convergence behaviour of this algorithm. In this figure the algorithm was run for 10 epochs on a neural network training problem. The gradient of the $\beta$-Augmented Lagrangian is plotted in blue.
@@ -118,7 +118,7 @@ The constraint violations, and the variables associated with the states are not 
 \end{figure}
 
 \section{Least Squares Solver}
-To solve the LS problem \ref{loss} in Algorithm \ref{algo}, a Trust Region Reflective(\texttt{trf}) method is used, which is implemented in \texttt{scipy.optimize.least\_squares}. The following description is given by \texttt{scipy}: "The algorithm iteratively solves trust-region subproblems augmented by a special diagonal quadratic term and with trust-region shape determined by the distance from the bounds and the direction of the gradient."\cite{scipyls}. The \texttt{trf} method is described as being robust for both bounded and unbounded problems, and well suited for sparse Jacobians. 
+To solve the LS problem \ref{loss} in Algorithm \ref{algo}, a Trust Region Reflective(\texttt{trf}) method is used, which is implemented in \texttt{scipy.optimize.least\_squares} \cite{scipyls}. The following description is given by \texttt{scipy}: "The algorithm iteratively solves trust-region subproblems augmented by a special diagonal quadratic term and with trust-region shape determined by the distance from the bounds and the direction of the gradient." The \texttt{trf} method is described as being robust for both bounded and unbounded problems, and well suited for sparse Jacobians. 
 
 The LS problem \ref{loss} is an unbounded problem for which the library recommends using a Levenberg-Marquardt method. However this method cannot handle cases where the Jacobian has more columns than rows, which can sometimes occur depending on the size of the network and the number of data points used for training. Therefore we cannot use the Levenberg-Marquardt algorithm.
 
@@ -145,7 +145,7 @@ J_{M_{\beta}} =
 	\frac{\partial{M_{\beta}}}{\partial W_k} = -z_{k,j}\sigma'_k(W_kz_{k,j}), k = 0,\ldots,L, j = 1,\ldots,n
 \end{equation}
 
-$W_k$ is a matrix of size $d_{k+1}\times(d_k+1)$, and $z_{k,j}$ are vectors of size $d_k+1$, therefore this evaluates as a 3D tensor. $W_k$ must be vectorized first to allow this derivative to be used in the Jacobian. After vectorization the dimensions of this partial derivative as a block matrix are $d_{k+1}n \times d_{k+1}(d_{k}+1)$. The last partial derivative $\frac{\partial{M_{\beta}}}{\partial W_L}$ is also multiplied by a factor $\frac{1}{\beta}$.
+$W_k$ is a matrix of size $d_{k+1}\times(d_k+1)$, and $z_{k,j}$ are vectors of size $d_k+1$, therefore this evaluates as a 3D tensor. $W_k$ must be vectorized first to allow this derivative to be used in the Jacobian. After vectorization the dimensions of this partial derivative as a block matrix are: $d_{k+1}n \times d_{k+1}(d_{k}+1)$. The last partial derivative $\frac{\partial{M_{\beta}}}{\partial W_L}$ is also multiplied by a factor $\frac{1}{\beta}$.
 
  Next the columns of $J_{M_{\beta}}$ associated with the states $z_k$ are examined:
  
@@ -157,7 +157,7 @@ $W_k$ is a matrix of size $d_{k+1}\times(d_k+1)$, and $z_{k,j}$ are vectors of s
 For a fully connected neural network with identity output activation an example has been written out in Table \ref{jac-tab}. Figure \ref{jac} shows a visual representation of the matrix, where the nonzero elements have been colored black. An alternative representation, which is mathematically the same is to swap the rows corresponding to the loss function $F(u)$ to the bottom. This gives a matrix with a banded structure, which is is plotted in figure \ref{jac2}. This is the representation used in the code.
 
 
-Given a feedforward network with input dimension I, an output dimension O, and it D hidden layers of width W. The weight matrixes have $I\times W + O\times W + (D-1)\times W\times W$ parameters, the bias vectors have $D\times W+O$ parameters and the state vectors have $D\times W\times N$ parameters. On the other hand $M_{\beta}(u,\lambda)$ has an output dimension of $D\times W \times N + O\times N$. The dimension of the Jacobian for this network is therefore $(D \times W\times N + O\times N)\times (D\times W\times N + O + (D+I+O)\times W + (D-1)\times W^2)$. The Jacobian scales quadratically in size with the depth of the network and the number of datapoints. It scales cubically with the width of the network. The Jacobian will be taller than it is wide when $N \geq 1 + (D+I+O)\times W/O + (D-1)\times W^2/O$. 
+Consider a feedforward network with input dimension I, an output dimension O, and D hidden layers of width W. The weight matrixes have $I\times W + O\times W + (D-1)\times W\times W$ parameters, the bias vectors have $D\times W+O$ parameters and the state vectors have $D\times W\times N$ parameters. On the other hand $M_{\beta}(u,\lambda)$ has an output dimension of $D\times W \times N + O\times N$. The dimension of the Jacobian for this network is therefore $(D \times W\times N + O\times N)\times (D\times W\times N + O + (D+I+O)\times W + (D-1)\times W^2)$. The Jacobian scales quadratically in size with the depth of the network and the number of datapoints. It scales cubically with the width of the network. The Jacobian will be taller than it is wide when $N \geq 1 + (D+I+O)\times W/O + (D-1)\times W^2/O$. 
 
 
 \begin{figure}[b]
@@ -174,14 +174,14 @@ Given a feedforward network with input dimension I, an output dimension O, and i
 	  \caption{Jacobian matrix, rearranged}
 	  \label{jac2}
 	\end{subfigure}
-	\caption{Visual representation of Jacobian matrix for network with 2 inputs, 2 outputs, width 3, depth 2 and 7 datapoints. The non-zero elements have been colored black. The jacobian at the top is the same as the one on the bottom, but with swapped rows}
+	\caption{Visual representation of Jacobian matrix for network with 2 inputs, 2 outputs, width 3, depth 2 and 7 datapoints. The non-zero elements have been colored black. The Jacobian at the top is the same as the one on the bottom, but with swapped rows.}
 	\label{jactot}
 \end{figure}
 
 \section{Numerical verification of Jacobian Matrix}
 In the previous section the Jacobian matrix was derived analytically. In this section will be explained how the Jacobian is verified algorithmically.
 
-Algorithmic Differentation (AD) is a set of techniques which can be used to calculate the derivative of any computer code \cite{Rall1981}. Because all code is composed of elementary operations, AD can use the chain rule alongside the operations to automatically compute derivatives of arbitrary order. By injecting code from an AD library into the calculation of the neural network, the Jacobian can be calculated numerically. For this the AlgoPy python library was used. The output of the AD was then compared to the analytical result for a number of different network configurations, confirming them to be equal within a small tolerance. The code is shown in Appendix \ref{AD}
+Algorithmic Differentation (AD) is a set of techniques which can be used to calculate the derivative of any computer code \cite{Rall1981}, \cite{wikiad}. Because all code is composed of elementary operations, AD can use the chain rule alongside the operations to automatically compute derivatives of arbitrary order. By injecting code from an AD library into the calculation of the neural network, the Jacobian can be calculated numerically. For this the AlgoPy python library was used \cite{algopy}. The output of the AD was then compared to the analytical result for a number of different network configurations, confirming them to be equal within a small tolerance. The code is shown in Appendix \ref{AD}.
 
 \begin{table}
 \tiny
@@ -263,7 +263,7 @@ $h_D$ & N & 1 & 0 &...& 0 \\
       & N & 0 & 0 &...& 1  \\ \hline
 \end{tabular}}
 \end{subtable}
-\caption{Jacobian of feedforward neural network. In this table the biases are not included in the weight matrices $W_k$. Each layer has a the same width $W$ and same activation $\sigma$. There are $D$ layers. The input dimension is $I$ and the output dimension is $O$. There are $N$ datapoints.}
+\caption{Jacobian of feedforward neural network. In this table the biases are not included in the weight matrices $W_k$. Each layer has the same width $W$ and same activation $\sigma$. There are $D$ layers. The input dimension is $I$ and the output dimension is $O$. There are $N$ datapoints.}
 \label{jac-tab}
 
 \end{table}
