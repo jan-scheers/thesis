@@ -1,8 +1,8 @@
 \chapter{Numerical Experiments}
 \label{cha:3}
-In this chapter we shall compare the augmented Lagrangian Method with several industry standard backpropagation algorithms. We considered the following algorithms: ADAM, ...
+In this chapter we shall compare the augmented Lagrangian Method to an industry standard stochastic gradient descent backpropagation algorithm: ADaptive Moment Estimation(ADAM). 
 
-The first comparison will be run on a small example, for which we expect that all algorithms should easily converge to a good solution.
+The algorithms will be compared for two test cases. The first is a small regression problem, for which a gradient descent method has difficulties converging when using ReLU activation function. The second is a time series prediction problem with a larger dataset.
 
 \section{Training Algorithms and Stopping Criteria}
 This section will discuss the problem of comparing different training algorithms, which is not as straightforward as it might seem. In the literature many different methods of comparison are used. The main issue is the choice of stopping criterion. One could choose a tolerance for the loss function, but this is dependent on the problem at hand, and it is not possible to know beforehand what a "low" cost is for the selected network. Another option is to select a set number of epochs, but epochs of one algorithm are not necessarily equivalent to epochs of another algorithm. Finally the most straightforward option would be to let each algorithm run for a specified amount of time, and compare the loss on the training set after each run. In a certain way this might be the most fair option, because average running time is the most important factor in practice, if the final performance is similar. On the other hand it is hard for a new, experimental method to be as optimally coded as one that has been used in the field for many years already.
@@ -88,13 +88,13 @@ y = \sin^2(x) + \mathcal N(0,\delta), x \in [0,\pi]
          \caption{Training history of bad convergence}
          \label{adambadconv}
      \end{subfigure}
-    \caption{Examples of convergence behaviour of ADAM optimizer for network using ReLU activation and 40 data points. The network has 2 hidden layers of 16 nodes.}
+    \caption{Examples of convergence behaviour of ADAM optimizer for a network using ReLU activation and 40 data points. The network has 2 hidden layers of 16 nodes.}
     \label{adamconv}
 \end{figure}
 
 This function oscillates progressively faster, and the training algorithm will not always find a good solution. Figure \ref{adamconv} shows two examples runs of the ADAM optimizer for 4000 epochs. The only difference is the choice of initial weights and the random noise. The first example has converged well, and would probably improve even further if the number of epochs was increased. The second example has stagnated in a bad minimum. Figure \ref{almconv} shows an example run of the ALM optimizer for 12 epochs using the $tanh$ activation function. An example of bad convergence using this activation could not be found.
 
-For the first experiment two similar networks are trained to approximate function \ref{sin2}. The first network has 2 hidden layers of 8 nodes with $tanh$ activation function, the second has 2 hidden layers of 16 nodes with a ReLU activation function. Each is trained with progressively more data points. Every single configuration is run 20 times. The results are listed in table \ref{restab}. The code from this test is found in appendix \ref{app:B}
+For the first experiment two similar networks are trained to approximate function \ref{sin2}. The first network has 2 hidden layers of 8 nodes with $tanh$ activation function, the second has 2 hidden layers of 16 nodes with a ReLU activation function. Each is trained with progressively more data points. Every single configuration is run 20 times. The results are listed in table \ref{restab}. The code from this test is found in appendix \ref{sin2test}.
 
 \begin{table}
 \renewcommand{\arraystretch}{1.3}
@@ -152,7 +152,7 @@ The avg MSE, time and epochs has only been calculated over those runs which conv
 
 The network using ReLU activation function is especially difficult to train, as ADAM only converges 14 times in 60 total runs. In comparison ALM converges 47 times. This may be expected as the main strength of ReLU is found in large networks. In this network the "dying ReLU" problem seems to appear often \cite{Lu2020}. Because the derivative of ReLU is zero for all negative inputs, some nodes may get stuck and receive no gradient updates in a Gradient Descent method such as ADAM. On the other hand, the extra degrees of freedom in the ALM method may allow it to avoid this problem more often.
 
-Another point is that the run time of ALM scales approximately quadratically with the amount of data points N, while the runtime of ADAM stays constant. This is because the size of the Jacobian in ALM scales approximately quadratically with N, see equation \ref{}. In backpropagation the only factor which scales with N is the computation of the loss in the forward pass, which must be executed for every sample. This test has a small dataset, for which the computation of the loss is small compared to the other parts of the ADAM algorithm. In Big Data problems this cost is mitigated by using mini-batches to compute an approximate gradient instead of computing over the whole dataset. This idea could be applied to the ALM method, but this is left for future work.
+Another point is that the run time of ALM scales approximately quadratically with the amount of data points N, while the runtime of ADAM stays constant. This is because the size of the Jacobian in ALM scales approximately quadratically with N, see equation \ref{jdim}. In backpropagation the only factor which scales with N is the computation of the loss in the forward pass, which must be executed for every sample. This test has a small dataset, for which the computation of the loss is small compared to the other parts of the ADAM algorithm. In Big Data problems this cost is mitigated by using mini-batches to compute an approximate gradient instead of computing over the whole dataset. This idea could be applied to the ALM method, but this is left for future work.
 
 
 \section{Santa Fe timeseries data}
@@ -173,24 +173,9 @@ For this prediction task a recurrent neural network is set up with one hidden la
 
 Each prediction $\hat{y}_{k+1}$ is made based on a vector of the previous $p$ predictions. Once initialized this network can make new predictions by feeding itself previous predictions. It is a network with $p$ inputs, and one output. 
 
-Based on results from \cite{suykens2020}, a network is chosen with 80 inputs and 48 nodes in the hidden layer. The activation function is $\tanh$. The data is first normalized to have a mean of 0 and a standard deviation of 1. Next input-output pairs $(\textbf{x}_i,y_i)$  are generated from the dataset. Because each output data point $y_i$ needs a corresponding vector $\textbf{x}_i$ of 80 previous inputs, the first 80 training points cannot serve as output. This leaves 920 input-output pairs in the dataset. Due to memory limitations, the training set is restricted to 600 pairs, leaving 320 pairs as validation data. The data is randomly distributed over these two sets. Both algorithm are run 4 times, in each run both algorithms start with the same initial weights and dataset distribution. The test is run on an Intel(R) Core(TM) i5-7300HQ CPU @ 2.50GHz with 8Gi RAM and SSD hard disk.
+Based on results from \cite{suykens2020}, a network is chosen with 80 inputs and 48 nodes in the hidden layer. The activation function is $\tanh$. The data is first normalized to have a mean of 0 and a standard deviation of 1. Next input-output pairs $(\textbf{x}_i,y_i)$  are generated from the dataset. Because each output data point $y_i$ needs a corresponding vector $\textbf{x}_i$ of 80 previous inputs, the first 80 training points cannot serve as output. This leaves 920 input-output pairs in the dataset. Due to memory limitations, the training set is restricted to 600 pairs, leaving 320 pairs as validation data. The data is randomly distributed over these two sets. Both algorithm are run 4 times, in each run both algorithms start with the same initial weights and dataset distribution. The code is printed in Appendix \ref{santafecode} The test is run on an Intel(R) Core(TM) i5-7300HQ CPU @ 2.50GHz with 8Gi RAM and SSD hard disk.
 
 Figure \ref{laserpred} plots the prediction of the best performing run for each algorithm, while figure \ref{laserconv} plots the corresponding training history. The prediction by the network trained by ADAM is better. While both networks predict the large oscillations reasonably well, the reset that happens when the oscillations get too big is only predicted by the network trained by ADAM. Curiously the MSE of the validation set does not improve much during training in either algorithm. The plot of the MSE during training is similar for both algorithms.
-
-Table \ref{rectab} lists the numerical results of the test. The MSE of the training data is similar for both algorithms, but slightly better for ADAM. The MSE of the prediction compared to the test data is much better for ADAM. The biggest difference is in running time, it takes ALM on average 20min to finish a run, while for ADAM it takes 20s. This is because the Jacobian scales quadratically in size with the number of data points. Table \ref{jevaltab} shows the number of calls to the Jacobian per epoch. Most calls are made in the first epochs.
-
-\section{Conclusion}
-In this chapter the new algorithm is tested against ADAM, an industry standard backpropagation method.
-
-In the first experiment a small regression problem is selected which is difficult to train for classical gradient descent methods.  In this test ALM converges in 46 out of 60 training runs, while ADAM converges only 14 out of 60 runs. ALM also shows a shorter running time.
-
-In the second experiment a time series prediction problem is selected using the Santa Fe competition laser dataset. A recurrent neural network is trained to predict time series data for this nonlinear system. The prediction made by the network trained by ADAM had an MSE of $9.100e^{-2}$ while the network trained by ALM showed an MSE of $8.288e^{-1}$. Because this problem is much larger in terms of dataset size and network size, ALM took on average 1201s to finish, while ADAM needed 20.9s.
-
-ALM shows promising results, but so far is limited by the size of the dataset. Implementing a mini-batch training mode could address this limitation.
-
-
-
-
 
 \begin{figure}[p]
      \centering
@@ -206,7 +191,7 @@ ALM shows promising results, but so far is limited by the size of the dataset. I
          \caption{Prediction of network trained with ADAM}
          \label{adampred}
      \end{subfigure}
-     \caption{Best network prediction compared to test set for both algorithms}
+     \caption{Best network prediction compared to test set for both algorithms. The test data is plotted in black, the prediction of the network is plotted in red.}
      \label{laserpred}
 \end{figure}
 
@@ -224,11 +209,14 @@ ALM shows promising results, but so far is limited by the size of the dataset. I
          \caption{Training and validation MSE for ADAM}
          \label{adamlaserconv}
      \end{subfigure}
-     \caption{Comparison of convergence behaviour on training set and validation set for both algorithms.}
+     \caption{Comparison of convergence behaviour on training set and validation set for both algorithms. The training loss is plotted in blue, the validation loss in orange.}
      \label{laserconv}
 \end{figure}
 
-\begin{table}
+\FloatBarrier
+
+
+\begin{table}[h!]
 \renewcommand{\arraystretch}{1.3}
 \centering
 \small
@@ -244,7 +232,9 @@ ALM shows promising results, but so far is limited by the size of the dataset. I
 \end{table}
 
 
-\begin{table}
+Table \ref{rectab} lists the numerical results of the test. The MSE of the training data is similar for both algorithms, but slightly better for ADAM. The MSE of the prediction compared to the test data is much better for ADAM. The biggest difference is in running time, it takes ALM on average 20min to finish a run, while for ADAM it takes 20s. This is because the Jacobian scales quadratically in size with the number of data points. Table \ref{jevaltab} shows the number of calls to the Jacobian per epoch. Most calls are made in the first epochs.
+
+\begin{table}[h!]
 \centering
 \begin{tabular}{r| c c c c c }
 Epoch	 	& 1	& 2 & 3 & 4 & 5 \\ \hline
@@ -253,6 +243,22 @@ Epoch	 	& 1	& 2 & 3 & 4 & 5 \\ \hline
 \caption{Average number of Jacobian evaluations per epoch}
 \label{jevaltab}
 \end{table}
+
+\section{Conclusion}
+In this chapter the new algorithm is tested against ADAM, an industry standard backpropagation method.
+
+In the first experiment a small regression problem is selected which is difficult to train for classical gradient descent methods.  In this test ALM converges in 46 out of 60 training runs, while ADAM converges only 14 out of 60 runs. ALM also shows a shorter running time.
+
+In the second experiment a time series prediction problem is selected using the Santa Fe competition laser dataset. A recurrent neural network is trained to predict time series data for this nonlinear system. The prediction made by the network trained by ADAM had an MSE of $9.100e^{-2}$ while the network trained by ALM showed an MSE of $8.288e^{-1}$. Because this problem is much larger in terms of dataset size and network size, ALM took on average 1201s to finish, while ADAM needed 20.9s.
+
+ALM shows promising results, but so far is limited by the size of the dataset. Implementing a mini-batch training mode could address this limitation.
+
+\begin{frame}[fragile]{References}
+\begin{tabular}{c r}
+[1] & A. Dertat. Applied deep learning - part 1: Artificial neural networks. URL: https://towardsdatascience.com/applied-deep-learning-part-1-artificial-neural-networks-d7834f67a4f6, retrieved 2021-05-31 \\
+\end{tabular}
+\end{frame}
+
 
 
 

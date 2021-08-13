@@ -127,7 +127,11 @@ We want to pick the parameters of the neural network so that the predicted outpu
 \label{op-eq}
 \end{equation}
 
-In this thesis only regression problems will be considered, where $l(x,y)$ is the quadratic loss function $l(x,y) = ||x^2-y^2||$, a.k.a. mean square error (MSE). For classification problems cross entropy loss is the most common cost function: $l(x,y) = x\log(y)+(1-x)\log(y)$. Writing down equation \ref{op-eq} using the MSE gives the following optimization problem:
+In this thesis only regression problems will be considered, where $l(x,y)$ is the quadratic loss function $l(x,y) = ||x^2-y^2||$, a.k.a. mean square error (MSE). 
+
+For classification problems cross entropy loss is the most common cost function: $l(x,y) = x\log(y)+(1-x)\log(1-y)$, a. k. a. negative log-likelihood. This loss function is a proxy for the 0-1 loss which is commonly associated with classification problems. The advantage is that negative log-likelihood is a smooth function which can be optimized for. It also continues to decrease even after reaching 0, allowing the training to push the classes even further apart, making the network more robust.
+
+Writing down equation \ref{op-eq} using the MSE gives the following optimization problem:
 
 \begin{equation}
 \begin{aligned}
@@ -138,6 +142,7 @@ In this thesis only regression problems will be considered, where $l(x,y)$ is th
 \end{equation}
 
 Most methods for solving equation \ref{op-eq} are based on gradient descent (GD). This algorithm uses the gradient of the loss function to search for a local minimum:
+
 \begin{equation}
 W_{k+1} = W_{k} - \eta_k\nabla F(W_k)
 \label{gd-eq}
@@ -151,7 +156,8 @@ In practice the datasets that are used in training can be large to very large, i
 W_{k+1} = W_{k} - \eta_k\nabla^i F(W_k)
 \label{gd-eq}
 \end{equation}
-where $\nabla^i F(W_k)$ is the gradient calculated with respect to the samples in the "mini-batch". In each epoch a different set of samples is selected. This is the Stochastic Gradient Descent method. In general this method will converge to the same solution \cite{Bottou2005}. This algorithm can be improved even further by using an adaptive learning rate $\eta_k$, such as RMSProp or ADAM, which are currently the most popular algorithms. The choice of which algorithm to use is largely based on the user's familiarity with the algorithm and its hyperparameters \cite{Goodfellow-et-al-2016}.
+
+where $\nabla^i F(W_k)$ is the gradient calculated with respect to the samples in the "mini-batch". In each epoch a different set of samples is selected. This is the Stochastic Gradient Descent method. In general this method will converge to the same solution \cite{Bottou2005}. This algorithm can be improved even further by using an adaptive learning rate $\eta_k$, such as RMSProp or ADAM. SGD methods with adaptive learning rate have emerged as the most effective algorithms in practice. The choice of which specific algorithm to use is largely based on the user's preference, and familiarity with the algorithm and its hyperparameters \cite{Goodfellow-et-al-2016}.
 
 \section{Neural network training as an optimal control problem}
 Neural network training can also be seen as an optimal control problem. A neural network is a multi-stage dynamical system, where every layer is a stage. The dynamics are ruled by the equations \ref{st-eq}. In optimal control the following objective cost function is considered:
@@ -254,8 +260,6 @@ The code will be compared to common Gradient Descent methods used in practice su
 
 In particular the objective will be to see if this algorithm can better handle known challenges for current training algorithms, such as the "vanishing/exploding gradient problem", or convergence to "bad local minima" (Goodfellow et al. \cite{Goodfellow-et-al-2016}, Sec. 8.2).
 
-\newpage
-
 \section{Structure of the Thesis}
 In chapter 2 the multiple shooting method will be investigated using MATLAB, and compared on some test problems against a gradient descent method.
 
@@ -269,7 +273,7 @@ Appendix A lists a collection of MATLAB code used in the thesis.
 
 Appendix B lists a collection of python code used in the thesis.
 
-The full source code can be downloaded from https://github.com/jan-scheers/thesis/.
+The full source code can be downloaded from \url{https://github.com/jan-scheers/thesis/}.
 
 
 

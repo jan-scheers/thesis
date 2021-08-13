@@ -1,8 +1,9 @@
 \chapter{Source code}
 \label{app:A}
-This appendix contains the source code of the experiment in Chapter 1
+This appendix contains the source of MATLAB code used in the thesis.  This code can also be found at \url{https://github.com/jan-scheers/thesis/}.
 
 \section{First experiment source}
+This script executes a batch test for the first MATLAB experiment. This experiment uses the \texttt{tansig} ($\tanh$) activation function.
 \begin{verbatim}
 R = zeros(20,6);
 for k = 1:20
@@ -92,6 +93,7 @@ end
 \end{verbatim}
 
 \subsection{Second experiment source}
+This script executes a batch test for the second MATLAB experiment. This experiment uses the \texttt{poslin} (ReLU) activation function.
 \begin{verbatim}
 R = zeros(20,6);
 for k = 1:20
@@ -128,10 +130,10 @@ for k = 1:20
 
     assign(w1,net.IW{1});
     assign(b1,net.b{1});
-    assign(x1,tansig(value(w1*xin+repmat(b1,1,N))));
+    assign(x1,poslin(value(w1*xin+repmat(b1,1,N))));
     assign(w2,net.LW{2,1});
     assign(b2,net.b{2});
-    assign(x2,tansig(value(w2*x1 +repmat(b2,1,N))));
+    assign(x2,poslin(value(w2*x1 +repmat(b2,1,N))));
     assign(w3,net.LW{3,2});
     assign(b3,net.b{3});
     

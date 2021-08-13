@@ -156,11 +156,7 @@ $W_k$ is a matrix of size $d_{k+1}\times(d_k+1)$, and $z_{k,j}$ are vectors of s
  
 For a fully connected neural network with identity output activation an example has been written out in Table \ref{jac-tab}. Figure \ref{jac} shows a visual representation of the matrix, where the nonzero elements have been colored black. An alternative representation, which is mathematically the same is to swap the rows corresponding to the loss function $F(u)$ to the bottom. This gives a matrix with a banded structure, which is is plotted in figure \ref{jac2}. This is the representation used in the code.
 
-
-Consider a feedforward network with input dimension I, an output dimension O, and D hidden layers of width W. The weight matrixes have $I\times W + O\times W + (D-1)\times W\times W$ parameters, the bias vectors have $D\times W+O$ parameters and the state vectors have $D\times W\times N$ parameters. On the other hand $M_{\beta}(u,\lambda)$ has an output dimension of $D\times W \times N + O\times N$. The dimension of the Jacobian for this network is therefore $(D \times W\times N + O\times N)\times (D\times W\times N + O + (D+I+O)\times W + (D-1)\times W^2)$. The Jacobian scales quadratically in size with the depth of the network and the number of datapoints. It scales cubically with the width of the network. The Jacobian will be taller than it is wide when $N \geq 1 + (D+I+O)\times W/O + (D-1)\times W^2/O$. 
-
-
-\begin{figure}[b]
+\begin{figure}[p]
 	\centering
 	\begin{subfigure}{\textwidth}
 	  \centering
@@ -178,12 +174,25 @@ Consider a feedforward network with input dimension I, an output dimension O, an
 	\label{jactot}
 \end{figure}
 
+Consider a feedforward network with input dimension I, an output dimension O, and D hidden layers of width W. The weight matrixes have $I \cdot W + O \cdot W + (D-1) \cdot W \cdot W$ parameters, the bias vectors have $D \cdot W+O$ parameters and the state vectors have $D \cdot W \cdot N$ parameters. On the other hand $M_{\beta}(u,\lambda)$ has an output dimension of $D \cdot W \cdot N + O \cdot N$. The dimension of the Jacobian for this network is therefore :
+\begin{equation}
+(D \cdot W \cdot N + O \cdot N) \times (D \cdot W \cdot N + O + (D+I+O) \cdot W + (D-1) \cdot W^2)
+\label{jdim}
+\end{equation}. 
+
+The Jacobian scales quadratically in size with the depth of the network and the number of datapoints. It scales cubically with the width of the network. The Jacobian will have more rows than columns when:
+\begin{equation}
+	N \geq 1 + (D+I+O) \cdot W/O + (D-1) \cdot W^2/O
+\end{equation}
+
+
+
 \section{Numerical verification of Jacobian Matrix}
 In the previous section the Jacobian matrix was derived analytically. In this section will be explained how the Jacobian is verified algorithmically.
 
 Algorithmic Differentation (AD) is a set of techniques which can be used to calculate the derivative of any computer code \cite{Rall1981}, \cite{wikiad}. Because all code is composed of elementary operations, AD can use the chain rule alongside the operations to automatically compute derivatives of arbitrary order. By injecting code from an AD library into the calculation of the neural network, the Jacobian can be calculated numerically. For this the AlgoPy python library was used \cite{algopy}. The output of the AD was then compared to the analytical result for a number of different network configurations, confirming them to be equal within a small tolerance. The code is shown in Appendix \ref{AD}.
 
-\begin{table}
+\begin{table}[p]
 \tiny
 \centering
 
@@ -267,7 +276,6 @@ $h_D$ & N & 1 & 0 &...& 0 \\
 \label{jac-tab}
 
 \end{table}
-\FloatBarrier
 \section{Conclusion}
 In this chapter an Augmented Lagrangian framework was proposed to solve the Optimal Control Problem. A Least Squares solver was applied to the LS problem at the heart of the algorithm, and a Jacobian Matrix was analytically derived which is supplied to the solver. The Jacobian was also algorithmically verified. In the next chapter the algorithm will be investigated using numerical tests and compared against an industry standard optimizer.
 

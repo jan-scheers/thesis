@@ -46,16 +46,6 @@
 
 \tableofcontents*
 
-\begin{abstract}
-Huidige optimalisatiealgoritmes voor het trainen van diepe neurale netwerken zijn gebaseerd op gradi\"ent-afdalingsmethoden, die gebruik maken van het backpropagation algoritme om de gradi\"ent te berekenen. Deze algoritmes worden alom gebruikt en hebben een lange geschiedenis, maar hebben nog altijd enkele valkuilen zoals het probleem van "slechte" locale minima, waar het stationair punt gevonden door het algoritme slechter veel slechter presteert dan het globale minimum, of ook het "verdwijnende/ontploffende gradi\"ent" probleem. Sommige andere strategi\"en zijn geweest om de initialisatie te verbeteren, of om "vervroegd stoppen" aan te wenden om overfitting te vermijden.
-
-Het trainen van een neuraal netwerk is een optimalisatieprobleem dat kan geherformuleerd worden in een context van optimale regeltechniek. Dit is een nieuw perspectief dat toelaat om backpropagation als een "single shooting" methode te zien, maar ook de gelegenheid geeft om een nieuwe oplossingsmethode voor te stellen op basis van "multiple shooting". In de theorie van regeltechniek wordt deze methode vaak aangewend voor het oplossen van zeer niet-lineaire problemen.
-
-Het success van het backpropagation algoritme heeft er voor gezorgd dat weinig pogingen zijn gedaan om een alternatief te zoeken. In deze masterproef wordt de "multiple shooting" methode uitgewerkt. Er wordt een methode van de geaugmenteerde Lagrangiaan geimplementeerd om de haalbaarheid te onderzoeken van het trainen van neurale netwerken als een optimaal sturingsprobleem. Het nieuw algoritme wordt dan vergeleken met standaard backpropagation-optimalisatiealgoritmes die in de praktijk worden gebruikt.
-
-Voor kleine problemen kan het nieuw algoritme concurreren zowel in termen van snelheid als qualiteit van oplossing. Voor een benaderingsprobleem dat traditioneel moeilijk trainbaar is met huidige gradi\"ent-afdalingsmethoden door het "afstervende ReLU" probleem, convergeert het nieuw algoritme vaker tot een goede oplossing. Het schaalt echter niet goed voor trainingsproblemen met grote datasets. Het is ook alleen toepasbaar op benaderingsproblemen met "mean squared error" als loss functie. In toekomstig onderzoek kunnen andere algoritmes onderzocht worden in plaats van de geaugmenteerde Langrangiaan methode. Ook kan het algoritme uitgebreid worden om andere loss functies te aanvaarden, wat het breder toepasbaar zou maken. Ten slotte kan een batch training modus het algoritme schaalbaarder maken voor grote datasets.
-
-\end{abstract}
 
 \begin{abstract}
 Current optimization algorithms for training deep neural network models are based on gradient descent methods, which use the backpropagation algorithm to calculate the gradient. These established algorithms have a long history and work well in practice, but still have some pitfalls such as "bad" local minima, where the stationary point found by the algorithm has worse performance than the global minimum, or also the "vanishing/exploding gradient" problem. Most improvements to these algorithms have focused on refining the gradient descent algorithm such as by adding a momentum factor, or by using Nesterov acceleration. Some other strategies aim to improve the initialization or to use "early stopping" to avoid overfitting.
@@ -64,8 +54,21 @@ In this masterthesis, the focus is on the formulation of neural network training
 
 The success of the backpropagation algorithm means few attempts have been made to propose an alternative. In this thesis the "multiple shooting" method is investigated. A recently proposed inexact augmented Lagrangian framework is selected to evaluate the feasibility of solving neural network training as an optimal control problem using "multiple shooting". The Jacobian matrix at the heart of the method is analytically derived and verified numerically. The novel algorithm is then compared to the ADaptive Moment Estimation (ADAM) optimizer which is a widely used industry standard backpropagation algorithm.
 
-For small problems the novel algorithm shows a quicker running time compared to ADAM, with similar performance. A regression problem which is difficult to train for traditional gradient descent algorithms due to the "dying ReLU" problem, converges more often using the novel algorithm. When training a network with ReLU activation function, the ADAM algorithm converges in 14 out of 60 runs, while the novel algorithm converges in 47 out of 60 runs.  However its running time and memory requirements scale quadrically with the size of the data set. Also the new algorithm is so far only applicable on networks using mean squared error loss. 
+For small problems the novel algorithm shows a quicker running time compared to ADAM, with similar performance. A regression problem which is difficult to train for traditional gradient descent algorithms due to the "dying ReLU" problem, converges more often using the novel algorithm. When training a network with ReLU activation function, the ADAM algorithm converges in 14 out of 60 runs, while the novel algorithm converges in 47 out of 60 runs.  However its running time and memory requirements scale quadratically with the size of the data set. In a time series prediction problem with a larger dataset, the Santa Fe laser experiment, the new method converges, but takes 20min per run compared to 20s for ADAM.
+
 \end{abstract}
+
+\chapter*{Samenvatting}
+Huidige optimalisatiealgoritmes voor het trainen van diepe neurale netwerken zijn gebaseerd op gradi\"ent-afdalingsmethoden, die gebruik maken van het backpropagation algoritme om de gradi\"ent te berekenen. Deze algoritmes worden alom gebruikt en hebben een lange geschiedenis, maar hebben nog altijd enkele valkuilen zoals het probleem van "slechte" locale minima, waar het stationair punt gevonden door het algoritme slechter veel slechter presteert dan het globale minimum, of ook het "verdwijnende/ontploffende gradi\"ent" probleem. Andere strategi\"en stelden voor om de initialisatie te verbeteren, of om "vervroegd stoppen" aan te wenden om overfitting te vermijden.
+
+Het trainen van een neuraal netwerk is een optimalisatieprobleem dat kan geherformuleerd worden in een context van optimale regeltechniek. Dit is een nieuw perspectief dat toelaat om backpropagation als een "single shooting" methode te zien, maar ook de gelegenheid geeft om een nieuwe oplossingsmethode voor te stellen op basis van "multiple shooting". In de theorie van regeltechniek wordt deze methode vaak aangewend voor het oplossen van zeer niet-lineaire problemen.
+
+Het success van het backpropagation algoritme heeft er voor gezorgd dat weinig pogingen zijn gedaan om een alternatief te zoeken. In deze masterproef wordt de "multiple shooting" methode uitgewerkt. Er wordt een methode van de geaugmenteerde Lagrangiaan ge\"implementeerd om de haalbaarheid te onderzoeken van het trainen van neurale netwerken als een optimaal sturingsprobleem. Het nieuw algoritme wordt dan vergeleken met standaard backpropagation-optimalisatiealgoritmes die in de praktijk worden gebruikt.
+
+Voor kleine problemen kan het nieuw algoritme concurreren zowel in termen van snelheid als qualiteit van oplossing. Voor een benaderingsprobleem dat traditioneel moeilijk trainbaar is met huidige gradi\"ent-afdalingsmethoden door het "afstervende ReLU" probleem, convergeert het nieuw algoritme vaker. ADAM convergeert 14 keer op 60 trainingen, terwijl het nieuw algoritme 47 op 60 keer convergeert. Daar tegenover staat dat de looptijd en het geheugengebruik kwadratisch schalen met het aantal datapunten. Voor een voorspellingsprobleem met een groter aantal datapunten, de Santa Fe laser dataset, convergeert het nieuwe algoritme ook. De training duurt echter gemiddeld 20min, tegenover 20s voor ADAM.
+
+
+
 
 % In future research different algorithmic frameworks can be explored instead of the Augmented Lagrangian method. ALso expanding the algorithm to handle different loss functions would make it more widely applicable, and implementing a batch training mode would improve scalability
 
@@ -73,7 +76,7 @@ For small problems the novel algorithm shows a quicker running time compared to 
 %\listoffigures
 %\listoftables
 % Bij een beperkt aantal figuren en tabellen gebruik je liever het volgende:
-%\listoffiguresandtables
+\listoffiguresandtables
 % De lijst van symbolen is eveneens optioneel.
 % Deze lijst moet wel manueel aangemaakt worden, bv. als volgt:
 \chapter{List of Abbreviations and Symbols}
@@ -91,6 +94,7 @@ For small problems the novel algorithm shows a quicker running time compared to 
   	GD & Gradient Descent \\
   	LS & Least Squares \\
   	MS & Multiple Shooting \\
+  	DMS & Direct Multiple Shooting \\
   	MSE & Mean Squared Error \\
   	NLP & Non-Linear Program \\
   	OCP & Optimal Control Problem \\
@@ -101,8 +105,21 @@ For small problems the novel algorithm shows a quicker running time compared to 
 \begin{flushleft}
   \renewcommand{\arraystretch}{1.1}
   \begin{tabularx}{\textwidth}{@{}p{12mm}X@{}}
+  	$\beta$ & penalty parameter \\
+  	$C(\cdot)$ & Cost function \\
+ 	$d_i$ & layer dimension \\
+  	$\eta$ & tolerance parameter \\
+ 	$h(\cdot)$ & constraint function \\
+ 	$F(\cdot)$ & objective function \\
+    $f_W(\cdot)$ & neural network function \\
+    $J$ & Jacobian Matrix \\
     $\mathcal{L}_{\beta}$   & $\beta$-Augmented Lagrangian \\
-    $\mathcal{N}(\mu,\sigma)$ & Normal distribution with mean $\mu$, std. dev. $\sigma$
+    $\mathcal{N}(\cdot,\cdot)$ & Normal distribution \\
+    $\sigma(\cdot)$ & neuron activation function \\
+    $W_i$ & Weight matrix of layer $i$ \\
+    $x$ & network input \\
+    $y$ & network target \\
+    $z$ & network state \\
   \end{tabularx}
 \end{flushleft}
 
